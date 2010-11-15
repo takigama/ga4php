@@ -33,23 +33,60 @@ if(isset($_REQUEST["action"])) {
 				echo "<font color=\"red\">Failed!</font>";
 			}
 			break;
+		case "resync":
+			$username = $_REQUEST["username"];
+			$code1 = $_REQUEST["code1"];
+			$code2 = $_REQUEST["code2"];
+			if($ga->resyncCode($username, $code1, $code2)) {
+				echo "<font color=\"green\">Passed!</font>";
+			} else {
+				echo "<font color=\"red\">Failed!</font>";
+			}
+			break;
+		case "destroy":
+			unlink("/tmp/gaexpage.db");
+			break;
 		default:
 			// do nothing
 	}
 }
 
 ?>
-
-Create a User:
+<h2>Destroy the DB</h2>
+<a href="index.php?action=destroy">This is UNDOABLE - but this is a test system, so you dont care</a>
+<h2>Create a User:</h2>
 <form method="post" action="index.php?action=createuser">
 Username: <input type="text" name="username"><br>
 Type (ignored for now): <select name="ttype"><option value="HOTP">HOTP</option><option value="TOTP">TOTP</option></select><br>
 <input type="submit" name="go" value="go"><br>
 </form>
 <hr>
+<h2>Test Token</h2>
 <form method="post" action="index.php?action=authuser">
-Username: <input type="text" name="username"><br>
+Username: <select name="username">
+<?php
+$res = $ga->getUserList();
+foreach($res as $row) {
+	echo "<option value=\"".$row."\">".$row."</option>";
+}
+?>
+</select><br>
 Code: <input type="text" name="code"><br>
+<input type="submit" name="go" value="go"><br>
+</form>
+<hr>
+<h2>Resync Code (only valid for HOTP codes)</h2>
+<form method="post" action="index.php?action=resync">
+Username: <select name="username">
+<?php
+$res = $ga->getUserList();
+foreach($res as $row) {
+	echo "<option value=\"".$row."\">".$row."</option>";
+}
+?>
+</select><br>
+Code one: <input type="text" name="code1"><br>
+Code two: <input type="text" name="code2"><br>
 <input type="submit" name="go" value="go"><br>
 </form>
 <hr>

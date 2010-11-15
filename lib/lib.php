@@ -1,5 +1,11 @@
 <?php
 
+/*
+ * TODO's:
+ * Implement TOTP fully
+ * Error checking, lots of error checking
+ */
+
 class GoogleAuthenticator {
 	
 	// first we init google authenticator by passing it a filename
@@ -59,6 +65,21 @@ class GoogleAuthenticator {
 		$url = $this->createURL($username, $key);
 		
 		return $url;
+	}
+	
+	
+	// this could get ugly for large databases.. we'll worry about that if it ever happens.
+	function getUserList() {
+		$res = $this->dbConnector->query("select user_name from users");
+		$i = 0;
+		$ar = array();
+		foreach($res as $row) {
+			error_log("user: ".$row["user_name"]);
+			$ar[$i] = $row["user_name"];
+			$i++;
+		}
+		
+		return $ar;
 	}
 	
 	// set the token type the user it going to use.
@@ -154,6 +175,22 @@ class GoogleAuthenticator {
 		return true;
 	}
 	
+	
+	// have user?
+	function userExists($username) {
+		$sql = "select * from users where user_name='$username'";
+		$res = $this->dbConnector->query($sql);
+		
+		$tid = -1;
+		foreach($res as $row) {
+			$tid = $row["user_tokenid"];	
+		}
+		
+		if($tid == -1) return false;
+		else return $tid;
+	}
+	
+	
 	// self explanitory?
 	function deleteUser($username) {
 		$sql = "select * from users where user_name='$username'";
@@ -232,7 +269,61 @@ class GoogleAuthenticator {
 	// many codes are called, we only check up to 20 codes in the future
 	// so if the user is at 21, they'll always fail. 
 	function resyncCode($username, $code1, $code2) {
-			
+		// here we'll go from 0 all the way thru to 200k.. if we cant find the code, so be it, they'll need a new one
+		$sql = "select * from users where user_name='$username'";
+		$res = $this->dbConnector->query($sql);
+		
+		$tid = -1;
+		foreach($res as $row) {
+			$tid = $row["user_tokenid"];	
+		}
+		
+		// for HOTP tokens we start at x and go to x+20
+		
+		// for TOTP we go +/-1min TODO = remember that +/- 1min should
+		// be changed based on stepping if we change the expiration time
+		// for keys
+		
+		//		$this->dbConnector->query('CREATE TABLE "tokens" ("token_id" INTEGER PRIMARY KEY AUTOINCREMENT,"token_key" TEXT NOT NULL, "token_type" TEXT NOT NULL, "token_lastid" INTEGER NOT NULL)');
+		
+		$sql = "select * from tokens where token_id='$tid'";
+		$res = $this->dbConnector->query($sql);
+		
+		$tkey = "";
+		$ttype = "";
+		$tlid = "";
+		foreach($res as $row) {
+			$tkey = $row["token_key"];
+			$ttype = $row["token_type"];
+			$tlid = $row["token_lastid"];	
+		}
+		
+		switch($ttype) {
+			case "HOTP":
+				$st = 0;
+				$en = 200000;
+				for($i=$st; $i<$en; $i++) {
+					$stest = $this->oath_hotp($tkey, $i);
+					//echo "code: $code, $stest, $tkey\n";
+					if($code1 == $stest) {
+						$stest2 = $this->oath_hotp($tkey, $i+1);
+						if($code2 == $stest2) {
+							$sql = "update tokens set token_lastid='$i' where token_id='$tid'";
+							$this->dbConnector->query($sql);
+							return true;
+						}
+					}
+				}
+				return false;
+				break;
+			case "TOTP":
+				break;
+			default:
+				echo "how the frig did i end up here?";
+		}
+		
+		return false;
+		
 	}
 	
 	// gets the error text associated with the last error
