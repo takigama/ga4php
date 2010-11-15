@@ -21,6 +21,7 @@ codes. But looking at the App's available for smartphones
 that fullfilled some realistic criteria - easy to use, easy to
 provision.
 
+
 READ THIS BIT
 =============
 
@@ -44,6 +45,10 @@ Ultimately, this is just a library with a web based example,
 the purpose of which is to integrate into your exisint applications,
 those that are PHP.
 
+
+Usage
+=====
+... TODO ...
 
 Complications
 =============
