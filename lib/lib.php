@@ -330,7 +330,11 @@ class GoogleAuthenticator {
 	function createURL($user, $key,$toktype = "HOTP") {
 		// oddity in the google authenticator... hotp needs to be lowercase.
 		$toktype = strtolower($toktype);
-		$url = "otpauth://$toktype/$user?secret=$key";
+		if($toktype == "hotp") {
+			$url = "otpauth://$toktype/$user?secret=$key&counter=1";
+		} else {
+			$url = "otpauth://$toktype/$user?secret=$key";
+		}
 		//echo "url: $url\n";
 		return $url;
 	}
