@@ -1,69 +1,48 @@
 <?php
 
+
 /*
  * TODO's:
  * Implement TOTP fully
  * Error checking, lots of error checking
+ * have a way of encapsulating token data stright into a single field so it could be added
+ *    in some way to a preexisting app without modifying the DB as such... or by just adding
+ *    a single field to a user table...
+ * Remove all reliance on the SQLite database. Data should come from the encasultating application
+ *    which will be expected to provde two function calls where it can get/store data - DONE
  */
 
+/*
+ * I am an idiot.
+ * For some reason i had it in my head to pass static functions into the construct
+ * of the class in order to hand data going in/out
+ * when in reality i should be making the data in/out func's abstract
+ * and getting implementors to extend the class
+ * 
+ * For now im going to keep implementing it this way and thus my class will
+ * forever be an example of poor design choices. It'll change it very shortly though 
+ */
 class GoogleAuthenticator {
 	
 	// first we init google authenticator by passing it a filename
 	// for its sqlite database.
-	function __construct($file) {
-		if(file_exists($file)) {
-			try {
-				$this->dbConnector = new PDO("sqlite:$file");
-			} catch(PDOException $exep) {
-				$this->errorText = $exep->getMessage();
-				$this->dbConnector = false;
-			}			
-		} else {
-			$this->setupDB($file);
-		}
-		
-		$this->dbFile = $file;
+	// $getDataFunction expects 1 argument which defines what data it wants
+	// and can be "userlist" or "usertoken:username"
+	// $putDataFunciton expects 2 arguments, $1 is data type, $2 is the data
+	// $1 can be "changetoken:username", "removetoken:username", $2 is the token
+	// data in some encoded form
+	// tokenDATA will be like HOTP;KEY;CID where CID is the current counter value
+	// why encode like this? i cant think of a good reason tbh, i should probably just
+	// use php's arry encoder functions  
+	function __construct($getDataFunction, $putDataFunction) {
+		$this->putDataFunction = $putDataFunction;
+		$this->getDataFunction = $getDataFunction;
 	}
-	
-	// creates the database (tables);
-	function setupDB($file) {
-		
-		try {
-			$this->dbConnector = new PDO("sqlite:$file");
-		} catch(PDOException $exep) {
-			$this->errorText = $exep->getMessage();
-			$this->dbConnector = false;
-		}			
-	
-		// here we create some tables and stuff
-		$this->dbConnector->query('CREATE TABLE "users" ("user_id" INTEGER PRIMARY KEY AUTOINCREMENT,"user_name" TEXT NOT NULL,"user_tokenid" INTEGER)');
-		$this->dbConnector->query('CREATE TABLE "tokens" ("token_id" INTEGER PRIMARY KEY AUTOINCREMENT,"token_key" TEXT NOT NULL, "token_type" TEXT NOT NULL, "token_lastid" INTEGER NOT NULL)');
-	}
-	
-	// creates "user" in the database and returns a url for
-	// the phone. If user already exists, this returns false
-	// if any error occurs, this returns false
-	function setupUser($username, $tokentype="HOTP") {
-		$key = $this->createBase32Key();
-		
-		// sql for inserting into db
-		$key = $this->createUser($username, $key, $tokentype);
-		return $key;
-	}
-	
 	
 	// this could get ugly for large databases.. we'll worry about that if it ever happens.
 	function getUserList() {
-		$res = $this->dbConnector->query("select user_name from users");
-		$i = 0;
-		$ar = array();
-		foreach($res as $row) {
-			//error_log("user: ".$row["user_name"]);
-			$ar[$i] = $row["user_name"];
-			$i++;
-		}
-		
-		return $ar;
+		$func = $this->getDataFunction;
+		return $func("userlist", "");
 	}
 	
 	// set the token type the user it going to use.
@@ -75,163 +54,75 @@ class GoogleAuthenticator {
 			return false;
 		}
 		
-		$sql = "select * from users where user_name='$username'";
-		$res = $this->dbConnector->query($sql);
-		
-		foreach($res as $row) {
-			$tid = $row["user_tokenid"];	
-		}
-		
-		
-		// TODO MUST DO ERROR CHECK HERE, this line could be lethal
-		$sql = "update tokens set token_type='$tokentype' where token_id='$tid'";
+		$put["username"] = $username;
+		$put["tokentype"] = $tokentype;
+		$func = $this->putDataFunction;
+		$func("settokentype", $put);
 		
 		return true;	
 	}
 	
 	
 	// create "user" with insert
-	function createUser($username, $key, $ttype="HOTP") {
-		// sql for inserting into db
-		$sql = "select * from users where user_name='$username'";
-		$res = $this->dbConnector->query($sql);
-
-		//if($res) if($res->fetchCount()>0) {
-			//$this->errorText = "User Already Exists, $username";
-			//return false;
-		//}
-		
-		// and finally create 'em
+	function setUser($username, $key = "", $ttype="HOTP") {
+		if($key == "") $key = $this->createBase32Key();
 		$hkey = $this->helperb322hex($key);
-		$this->dbConnector->query("insert into tokens values (NULL, '$hkey', '$ttype', '0')");
-		$id = $this->dbConnector->lastInsertID();
-		$this->dbConnector->query("insert into users values (NULL, '$username', '$id')");
-
+		
+		$token["username"] = $username;
+		$token["tokenkey"] = $hkey;
+		$token["tokentype"] = $ttype;
+		
+		$func = $this->putDataFunction;
+		$func("setusertoken", $token);
+		
 		return $key;
 	}
 	
-	// Replcate "user" in the database... All this really
-	// does is to replace the key for the user. Returns false
-	// if the user doesnt exist of the key is poop
-	function replaceUser($username) {
-		$key = $this->createBase32Key();
-		
-		// delete the user - TODO, clean up auth tokens
-		$sql = "delete from users where user_name='$username'";
-		$res = $this->dbConnector->query($sql);
-		
-		// sql for inserting into db - just making sure.
-		$sql = "select * from users where user_name='$username'";
-		$res = $this->dbConnector->query($sql);
-
-		if($res->fetchCount()>0) {
-			$this->errorText = "User Already Exists, $username";
-			return false;
-		}
-		
-		// and finally create 'em
-		$this->dbConnector->query("insert into tokens values (NULL, '$key', '0')");
-		$id = $this->dbConnector->lastInsertID();
-		$this->dbConnector->query("insert into users values (NULL, '$username', '$id')");
-
-		$url = $this->createURL($username, $key);
-		
-		return $url;
-	}
 	
 	// sets the key for a user - this is assuming you dont want
 	// to use one created by the application. returns false
 	// if the key is invalid or the user doesn't exist.
 	function setUserKey($username, $key) {
-		$sql = "select * from users where user_name='$username'";
-		$res = $this->dbConnector->query($sql);
-		
-		foreach($res as $row) {
-			$tid = $row["user_tokenid"];	
-		}
-		
-		
-		// TODO MUST DO ERROR CHECK HERE, this line could be lethal
-		$sql = "update tokens set token_key='$key' where token_id='$tid'";
-		
-		return true;
+		// consider scrapping this
 	}
 	
 	
 	// have user?
 	function userExists($username) {
-		$sql = "select * from users where user_name='$username'";
-		$res = $this->dbConnector->query($sql);
-		
-		$tid = -1;
-		foreach($res as $row) {
-			$tid = $row["user_tokenid"];	
-		}
-		
-		if($tid == -1) return false;
-		else return $tid;
+		// need to think about this
 	}
 	
 	
 	// self explanitory?
 	function deleteUser($username) {
-		$sql = "select * from users where user_name='$username'";
-		$res = $this->dbConnector->query($sql);
-		
-		foreach($res as $row) {
-			$tid = $row["user_tokenid"];	
-		}
-		
-		
-		// TODO MUST DO ERROR CHECK HERE, this line could be lethal
-		$sql = "delete from tokens where token_id='$tid'";
-		$this->dbConnector->query($sql);
-		
-		$sql = "delete from users where user_name='$username'";
-		$this->dbConnector->query($sql);
+		$func = $this->putDataFunction;
+		$func("deleteusertoken", $username);
 	}
 	
 	// user has input their user name and some code, authenticate
 	// it
 	function authenticateUser($username, $code) {
-		$sql = "select * from users where user_name='$username'";
-		$res = $this->dbConnector->query($sql);
 		
-		$tid = -1;
-		foreach($res as $row) {
-			$tid = $row["user_tokenid"];	
-		}
+		$func = $this->getDataFunction;
+		$tokendata = $func("gettoken", $username);
 		
-		// for HOTP tokens we start at x and go to x+20
-		
-		// for TOTP we go +/-1min TODO = remember that +/- 1min should
-		// be changed based on stepping if we change the expiration time
-		// for keys
-		
-		//		$this->dbConnector->query('CREATE TABLE "tokens" ("token_id" INTEGER PRIMARY KEY AUTOINCREMENT,"token_key" TEXT NOT NULL, "token_type" TEXT NOT NULL, "token_lastid" INTEGER NOT NULL)');
-		
-		$sql = "select * from tokens where token_id='$tid'";
-		$res = $this->dbConnector->query($sql);
-		
-		$tkey = "";
-		$ttype = "";
-		$tlid = "";
-		foreach($res as $row) {
-			$tkey = $row["token_key"];
-			$ttype = $row["token_type"];
-			$tlid = $row["token_lastid"];	
-		}
-		
+		// TODO: check return value
+		$ttype = $tokendata["tokentype"];
+		$tlid = $tokendata["tokencounter"];
+		$tkey = $tokendata["tokenkey"];
 		switch($ttype) {
 			case "HOTP":
 				$st = $tlid;
 				$en = $tlid+20;
 				for($i=$st; $i<$en; $i++) {
 					$stest = $this->oath_hotp($tkey, $i);
-					error_log("code: $code, $stest, $tkey, $tid");
+					//error_log("code: $code, $stest, $tkey, $tid");
 					if($code == $stest) {
-						$sql = "update tokens set token_lastid='$i' where token_id='$tid'";
-						$this->dbConnector->query($sql);
+						$tokenset["username"] = $username;
+						$tokenset["tokencounter"] = $i;
+						
+						$func = $this->putDataFunction;
+						$func("settokencounter", $tokenset);
 						return true;
 					}
 				}
@@ -243,10 +134,10 @@ class GoogleAuthenticator {
 				$t_lat = $t_now + 60;
 				$t_st = ((int)($t_ear/30));
 				$t_en = ((int)($t_lat/30));
-				error_log("kmac: $t_now, $t_ear, $t_lat, $t_st, $t_en");
+				//error_log("kmac: $t_now, $t_ear, $t_lat, $t_st, $t_en");
 				for($i=$t_st; $i<=$t_en; $i++) {
 					$stest = $this->oath_hotp($tkey, $i);
-					error_log("code: $code, $stest, $tkey\n");
+					//error_log("code: $code, $stest, $tkey\n");
 					if($code == $stest) {
 						return true;
 					}
@@ -265,14 +156,6 @@ class GoogleAuthenticator {
 	// so if the user is at 21, they'll always fail. 
 	function resyncCode($username, $code1, $code2) {
 		// here we'll go from 0 all the way thru to 200k.. if we cant find the code, so be it, they'll need a new one
-		$sql = "select * from users where user_name='$username'";
-		$res = $this->dbConnector->query($sql);
-		
-		$tid = -1;
-		foreach($res as $row) {
-			$tid = $row["user_tokenid"];	
-		}
-		
 		// for HOTP tokens we start at x and go to x+20
 		
 		// for TOTP we go +/-1min TODO = remember that +/- 1min should
@@ -281,17 +164,13 @@ class GoogleAuthenticator {
 		
 		//		$this->dbConnector->query('CREATE TABLE "tokens" ("token_id" INTEGER PRIMARY KEY AUTOINCREMENT,"token_key" TEXT NOT NULL, "token_type" TEXT NOT NULL, "token_lastid" INTEGER NOT NULL)');
 		
-		$sql = "select * from tokens where token_id='$tid'";
-		$res = $this->dbConnector->query($sql);
+		$func = $this->getDataFunction;
+		$tokendata = $func("gettoken", $username);
 		
-		$tkey = "";
-		$ttype = "";
-		$tlid = "";
-		foreach($res as $row) {
-			$tkey = $row["token_key"];
-			$ttype = $row["token_type"];
-			$tlid = $row["token_lastid"];	
-		}
+		// TODO: check return value
+		$ttype = $tokendata["tokentype"];
+		$tlid = $tokendata["tokencounter"];
+		$tkey = $tokendata["tokenkey"];
 		
 		switch($ttype) {
 			case "HOTP":
@@ -303,8 +182,11 @@ class GoogleAuthenticator {
 					if($code1 == $stest) {
 						$stest2 = $this->oath_hotp($tkey, $i+1);
 						if($code2 == $stest2) {
-							$sql = "update tokens set token_lastid='$i' where token_id='$tid'";
-							$this->dbConnector->query($sql);
+							$tokenset["username"] = $username;
+							$tokenset["tokencounter"] = $i+1;
+						
+							$func = $this->putDataFunction;
+							$func("settokencounter", $tokenset);
 							return true;
 						}
 					}
@@ -450,8 +332,8 @@ class GoogleAuthenticator {
 	
 	
 	// some private data bits.
+	private $getDatafunction;
+	private $putDatafunction;
 	private $errorText;
-	private $dbFile;
-	private $dbConnector;
 }
 ?>
