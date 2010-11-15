@@ -43,28 +43,12 @@ class GoogleAuthenticator {
 	// creates "user" in the database and returns a url for
 	// the phone. If user already exists, this returns false
 	// if any error occurs, this returns false
-	function setupUser($username) {
+	function setupUser($username, $tokentype="HOTP") {
 		$key = $this->createBase32Key();
 		
 		// sql for inserting into db
-		$sql = "select * from users where user_name='$username'";
-		$res = $this->dbConnector->query($sql);
-
-		//if($res->fetchCount()>0) {
-			//$this->errorText = "User Already Exists, $username";
-			//return false;
-		//}
-		
-		// and finally create 'em
-		$hkey = $this->helperb322hex($key);
-		error_log("key for user $username is $hkey, $key");
-		$this->dbConnector->query("insert into tokens values (NULL, '$hkey', 'HOTP','0')");
-		$id = $this->dbConnector->lastInsertID();
-		$this->dbConnector->query("insert into users values (NULL, '$username', '$id')");
-
-		$url = $this->createURL($username, $key);
-		
-		return $url;
+		$key = $this->createUser($username, $key, $tokentype);
+		return $key;
 	}
 	
 	
@@ -74,7 +58,7 @@ class GoogleAuthenticator {
 		$i = 0;
 		$ar = array();
 		foreach($res as $row) {
-			error_log("user: ".$row["user_name"]);
+			//error_log("user: ".$row["user_name"]);
 			$ar[$i] = $row["user_name"];
 			$i++;
 		}
@@ -107,7 +91,7 @@ class GoogleAuthenticator {
 	
 	
 	// create "user" with insert
-	function createUser($username, $key) {
+	function createUser($username, $key, $ttype="HOTP") {
 		// sql for inserting into db
 		$sql = "select * from users where user_name='$username'";
 		$res = $this->dbConnector->query($sql);
@@ -119,13 +103,11 @@ class GoogleAuthenticator {
 		
 		// and finally create 'em
 		$hkey = $this->helperb322hex($key);
-		$this->dbConnector->query("insert into tokens values (NULL, '$hkey', 'HOTP', '0')");
+		$this->dbConnector->query("insert into tokens values (NULL, '$hkey', '$ttype', '0')");
 		$id = $this->dbConnector->lastInsertID();
 		$this->dbConnector->query("insert into users values (NULL, '$username', '$id')");
 
-		$url = $this->createURL($username, $key);
-		
-		return $url;
+		return $key;
 	}
 	
 	// Replcate "user" in the database... All this really
@@ -246,7 +228,7 @@ class GoogleAuthenticator {
 				$en = $tlid+20;
 				for($i=$st; $i<$en; $i++) {
 					$stest = $this->oath_hotp($tkey, $i);
-					//echo "code: $code, $stest, $tkey\n";
+					error_log("code: $code, $stest, $tkey, $tid");
 					if($code == $stest) {
 						$sql = "update tokens set token_lastid='$i' where token_id='$tid'";
 						$this->dbConnector->query($sql);
@@ -256,6 +238,19 @@ class GoogleAuthenticator {
 				return false;
 				break;
 			case "TOTP":
+				$t_now = time();
+				$t_ear = $t_now - 45;
+				$t_lat = $t_now + 60;
+				$t_st = ((int)($t_ear/30));
+				$t_en = ((int)($t_lat/30));
+				error_log("kmac: $t_now, $t_ear, $t_lat, $t_st, $t_en");
+				for($i=$t_st; $i<=$t_en; $i++) {
+					$stest = $this->oath_hotp($tkey, $i);
+					error_log("code: $code, $stest, $tkey\n");
+					if($code == $stest) {
+						return true;
+					}
+				}
 				break;
 			default:
 				echo "how the frig did i end up here?";
@@ -332,8 +327,10 @@ class GoogleAuthenticator {
 	}
 	
 	// create a url compatibile with google authenticator.
-	function createURL($user, $key) {
-		$url = "otpauth://hotp/$user?secret=$key";
+	function createURL($user, $key,$toktype = "HOTP") {
+		// oddity in the google authenticator... hotp needs to be lowercase.
+		$toktype = strtolower($toktype);
+		$url = "otpauth://$toktype/$user?secret=$key";
 		//echo "url: $url\n";
 		return $url;
 	}
