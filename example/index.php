@@ -1,6 +1,14 @@
 <?php
 
 require_once("../lib/lib.php");
+if(isset($_REQUEST["action"])) {
+	switch($_REQUEST["action"]) {
+		case "destroy":
+			unlink("/tmp/gaexpage.db");
+			break;
+	}
+}
+
 
 $ga = new GoogleAuthenticator("/tmp/gaexpage.db");
 ?>
@@ -13,14 +21,17 @@ if(isset($_REQUEST["action"])) {
 		case "createuser":
 			$username = $_REQUEST["username"];
 			$pr = preg_match('/^[a-zA-Z0-9@\.]+$/',"$username");
+			$ttype = $_REQUEST["ttype"];
 			echo "<hr>";
 			if(strlen($username)<3) {
 				echo "<font color=\"red\">Sorry, username must be at least 3 chars</font>";
 			} else if($pr<1) {
 				echo "<font color=\"red\">Sorry, username can only contain a-z, A-Z, 0-9 @ and .</font>";
 			} else {
-				$url = $ga->setupUser($username);
-				echo "QRCode for user \"$username\" is <img src=\"http://chart.apis.google.com/chart?cht=qr&chl=$url&chs=120x120\"> or type in $url (actually its just the code on the end of the url)";
+				$key = $ga->setupUser($username, $ttype);
+				$keyinhex = $ga->helperb322hex($key);
+				$url = $ga->createURL($username, $key, $ttype);
+				echo "QRCode for user \"$username\" is <img src=\"http://chart.apis.google.com/chart?cht=qr&chl=$url&chs=120x120\"> or type in $key (google authenticator) or $keyinhex (for most other otp's)";
 			}
 			echo "<hr>";
 			break;
@@ -43,9 +54,6 @@ if(isset($_REQUEST["action"])) {
 				echo "<font color=\"red\">Failed!</font>";
 			}
 			break;
-		case "destroy":
-			unlink("/tmp/gaexpage.db");
-			break;
 		default:
 			// do nothing
 	}
@@ -57,7 +65,7 @@ if(isset($_REQUEST["action"])) {
 <h2>Create a User:</h2>
 <form method="post" action="index.php?action=createuser">
 Username: <input type="text" name="username"><br>
-Type (ignored for now): <select name="ttype"><option value="HOTP">HOTP</option><option value="TOTP">TOTP</option></select><br>
+Type: <select name="ttype"><option value="HOTP">HOTP</option><option value="TOTP">TOTP</option></select><br>
 <input type="submit" name="go" value="go"><br>
 </form>
 <hr>
