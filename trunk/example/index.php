@@ -30,7 +30,7 @@ if(isset($_REQUEST["action"])) {
 			} else {
 				$key = $ga->setupUser($username, $ttype);
 				$keyinhex = $ga->helperb322hex($key);
-				$url = $ga->createURL($username, $key, $ttype);
+				$url = urlencode($ga->createURL($username, $key, $ttype));
 				echo "QRCode for user \"$username\" is <img src=\"http://chart.apis.google.com/chart?cht=qr&chl=$url&chs=120x120\"> or type in $key (google authenticator) or $keyinhex (for most other otp's)";
 			}
 			echo "<hr>";
