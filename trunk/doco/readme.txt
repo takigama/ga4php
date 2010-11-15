@@ -33,6 +33,9 @@ KEY and should remain secret. You can generate qrcodes anyway you
 like, BUT MAKE SURE ITS SECURE (i.e. never save them on the FS,
 and send them all over ssl).
 
+If your running on linux, most distro's have a program called
+qrencode that you can use.
+
 
 How?
 ====
