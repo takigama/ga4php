@@ -22,6 +22,11 @@
  * For now im going to keep implementing it this way and thus my class will
  * forever be an example of poor design choices. It'll change it very shortly though 
  */
+
+/*
+ * The way we should really be doing things is to have an array that encapsulates "normal" data (or a class?)
+ * and then just manipulate it, then use a checkin function to push the data base into the db...
+ */
 class GoogleAuthenticator {
 	
 	// first we init google authenticator by passing it a filename
