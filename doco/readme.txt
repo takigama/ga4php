@@ -1,3 +1,8 @@
+/* Note: This readme is moderately out of day, go see the GA4PHP
+Wiki - http://code.google.com/p/ga4php/w/list But i'll keep the
+file around for historical reasons */
+
+
 The GA4PHP Project
 ==================
 
