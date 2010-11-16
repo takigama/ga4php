@@ -123,11 +123,12 @@ abstract class GoogleAuthenticator {
 		error_log("dat is $asdf");
 		switch($ttype) {
 			case "HOTP":
+				error_log("in hotp");
 				$st = $tlid;
 				$en = $tlid+20;
 				for($i=$st; $i<$en; $i++) {
 					$stest = $this->oath_hotp($tkey, $i);
-					//error_log("code: $code, $stest, $tkey, $tid");
+					error_log("testing code: $code, $stest, $tkey, $tid");
 					if($code == $stest) {
 						$tokendata["tokencounter"] = $i;
 						$this->internalPutData($username, $tokendata);
@@ -137,6 +138,7 @@ abstract class GoogleAuthenticator {
 				return false;
 				break;
 			case "TOTP":
+				error_log("in totp");
 				$t_now = time();
 				$t_ear = $t_now - 45;
 				$t_lat = $t_now + 60;
@@ -145,7 +147,7 @@ abstract class GoogleAuthenticator {
 				//error_log("kmac: $t_now, $t_ear, $t_lat, $t_st, $t_en");
 				for($i=$t_st; $i<=$t_en; $i++) {
 					$stest = $this->oath_hotp($tkey, $i);
-					//error_log("code: $code, $stest, $tkey\n");
+					error_log("testing code: $code, $stest, $tkey\n");
 					if($code == $stest) {
 						return true;
 					}

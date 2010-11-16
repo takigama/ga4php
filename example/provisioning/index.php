@@ -33,7 +33,7 @@ if(isset($_REQUEST["failure"])) {
 ?>
 
 <hr>
-<b>How to user this page</b> - Create a user with the "Users" form. Once a user is created, then in the "Create Token" form,
+<b>How to use this page</b> - Create a user with the "Users" form. Once a user is created, then in the "Create Token" form,
 select the user from the drop down box and then select a token type, then click "provision". In the main user list section
 your user should now have a qrcode representing the key for that user. Pull our your mobile phone (with the google
 authenticator app from the market) and scan in the code. Next, select the user who's authentication you wish to test from
@@ -89,6 +89,7 @@ Create a User:
 <form method="post" action="?action=createuser">
 Username/login: <input type="text" name="username">
 Full Name: <input type="text" name="fullname">
+Password: <input type="password" name="password">
 <input type="submit" name="Add" value="Add">
 </form>
 

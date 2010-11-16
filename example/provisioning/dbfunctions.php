@@ -14,7 +14,7 @@ function getDatabase() {
 		} catch(PDOException $exep) {
 			error_log("execpt on db open");
 		}
-		$sql = 'CREATE TABLE "users" ("users_id" INTEGER PRIMARY KEY AUTOINCREMENT,"users_username" TEXT,"users_fullname" TEXT,"users_tokendata" TEXT);';
+		$sql = 'CREATE TABLE "users" ("users_id" INTEGER PRIMARY KEY AUTOINCREMENT,"users_username" TEXT,"users_fullname" TEXT,"users_password" TEXT, "users_tokendata" TEXT);';
 		$dbobject->query($sql);
 	}
 	
