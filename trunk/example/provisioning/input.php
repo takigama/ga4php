@@ -10,7 +10,8 @@ function processInput() {
 				// "users_id" INTEGER PRIMARY KEY AUTOINCREMENT,"users_username" TEXT,"users_fullname" TEXT,"users_tokendata" TEXT
 				$username = $_REQUEST["username"];
 				$fullname = $_REQUEST["fullname"];
-				$sql = "insert into users values (NULL, '$username', '$fullname', '0')";
+				$password = sha1($_REQUEST["password"]);
+				$sql = "insert into users values (NULL, '$username', '$fullname', '$password','0')";
 				$db = getDatabase();
 				$db->query($sql);
 				closeDatabase($db);
