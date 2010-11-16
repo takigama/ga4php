@@ -33,6 +33,13 @@ if(isset($_REQUEST["failure"])) {
 ?>
 
 <hr>
+<b>How to user this page</b> - Create a user with the "Users" form. Once a user is created, then in the "Create Token" form,
+select the user from the drop down box and then select a token type, then click "provision". In the main user list section
+your user should now have a qrcode representing the key for that user. Pull our your mobile phone (with the google
+authenticator app from the market) and scan in the code. Next, select the user who's authentication you wish to test from
+the drop down list under "test authentication" section, generate a code for that user on your phone and click "Auth".
+this should fail/succeed depending on whether you have typed in the right code.
+<hr>
 
 
 
@@ -115,7 +122,7 @@ Token Type
 <option value="HOTP">Counter Based</option>
 <option value="TOTP">Time Based</option>
 </select>
-<input type="submit" name="Add" value="Add">
+<input type="submit" name="Provision" value="Provision">
 </form>
 
 <hr>
