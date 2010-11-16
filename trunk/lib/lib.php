@@ -1,22 +1,5 @@
 <?php
 
-
-/*
- * TODO's:
- * Implement TOTP fully
- * Error checking, lots of error checking
- * have a way of encapsulating token data stright into a single field so it could be added
- *    in some way to a preexisting app without modifying the DB as such... or by just adding
- *    a single field to a user table...
- * Remove all reliance on the SQLite database. Data should come from the encasultating application
- *    which will be expected to provde two function calls where it can get/store data - DONE
- */
-
-/*
- * The way we should really be doing things is to have an array that encapsulates "normal" data (or a class?)
- * and then just manipulate it, then use a checkin function to push the data base into the db...
- */
-
 abstract class GoogleAuthenticator {
 	
 	function __construct() {
@@ -88,6 +71,14 @@ abstract class GoogleAuthenticator {
 	}
 	
 	
+	function hasToken($username) {
+		$token = $this->internalGetData($username);
+		// TODO: change this to a pattern match for an actual key
+		if(!isset($token["tokenkey"])) return false;
+		if($token["tokenkey"] == "") return false;
+	}
+	
+	
 	// sets the key for a user - this is assuming you dont want
 	// to use one created by the application. returns false
 	// if the key is invalid or the user doesn't exist.
@@ -96,12 +87,6 @@ abstract class GoogleAuthenticator {
 		$token = $this->internalGetData($username);
 		$token["tokenkey"] = $key;
 		$this->internalPutData($username, $token);		
-	}
-	
-	
-	// have user?
-	function userExists($username) {
-		// need to think about this
 	}
 	
 	
@@ -117,6 +102,7 @@ abstract class GoogleAuthenticator {
 	// it
 	function authenticateUser($username, $code) {
 
+		if(preg_match("/[0-9][0-9][0-9][0-9][0-9][0-9]/",$code)<1) return false;
 		error_log("begin auth user");
 		$tokendata = $this->internalGetData($username);
 		$asdf = print_r($tokendata, true);
@@ -229,8 +215,11 @@ abstract class GoogleAuthenticator {
 	}
 	
 	// create a url compatibile with google authenticator.
-	function createURL($user, $key,$toktype = "HOTP") {
+	function createURL($user) {
 		// oddity in the google authenticator... hotp needs to be lowercase.
+		$data = $this->internalGetData($user);
+		$toktype = $data["tokentype"];
+		$key = $data["tokenkey"];
 		$toktype = strtolower($toktype);
 		if($toktype == "hotp") {
 			$url = "otpauth://$toktype/$user?secret=$key&counter=1";
@@ -355,5 +344,15 @@ abstract class GoogleAuthenticator {
 	private $getDatafunction;
 	private $putDatafunction;
 	private $errorText;
+	private $errorCode;
+	
+	/*
+	 * error codes
+	 * 1: Auth Failed
+	 * 2: No Key
+	 * 3: input code was invalid (user input an invalid code - must be 6 numerical digits)
+	 * 4: user doesnt exist?
+	 * 5: key invalid
+	 */
 }
 ?>
