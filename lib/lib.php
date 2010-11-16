@@ -58,7 +58,7 @@ abstract class GoogleAuthenticator {
 	
 	
 	// create "user" with insert
-	function setUser($username, $key = "", $ttype="HOTP") {
+	function setUser($username, $ttype="HOTP", $key = "") {
 		if($key == "") $key = $this->createBase32Key();
 		$hkey = $this->helperb322hex($key);
 		
@@ -76,6 +76,7 @@ abstract class GoogleAuthenticator {
 		// TODO: change this to a pattern match for an actual key
 		if(!isset($token["tokenkey"])) return false;
 		if($token["tokenkey"] == "") return false;
+		return true;
 	}
 	
 	
@@ -219,7 +220,7 @@ abstract class GoogleAuthenticator {
 		// oddity in the google authenticator... hotp needs to be lowercase.
 		$data = $this->internalGetData($user);
 		$toktype = $data["tokentype"];
-		$key = $data["tokenkey"];
+		$key = $this->helperhex2b32($data["tokenkey"]);
 		$toktype = strtolower($toktype);
 		if($toktype == "hotp") {
 			$url = "otpauth://$toktype/$user?secret=$key&counter=1";
@@ -242,7 +243,23 @@ abstract class GoogleAuthenticator {
 		
 		return $key;
 	}
+	
+	// returns a hex key
+	function getKey($username) {
+		$data = $this->internalGetData($username);
+		$key = $data["tokenkey"];
 		
+		return $key;
+	}
+		
+	// get key type
+	function getTokenType($username) {
+		$data = $this->internalGetData($username);
+		$toktype = $data["tokentype"];
+		
+		return $toktype;
+	}
+	
 	
 	function helperb322hex($b32) {
         $alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
