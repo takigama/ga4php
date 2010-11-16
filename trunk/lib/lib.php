@@ -13,43 +13,50 @@
  */
 
 /*
- * I am an idiot.
- * For some reason i had it in my head to pass static functions into the construct
- * of the class in order to hand data going in/out
- * when in reality i should be making the data in/out func's abstract
- * and getting implementors to extend the class
- * 
- * For now im going to keep implementing it this way and thus my class will
- * forever be an example of poor design choices. It'll change it very shortly though 
- */
-
-/*
  * The way we should really be doing things is to have an array that encapsulates "normal" data (or a class?)
  * and then just manipulate it, then use a checkin function to push the data base into the db...
  */
-class GoogleAuthenticator {
+
+abstract class GoogleAuthenticator {
 	
-	// first we init google authenticator by passing it a filename
-	// for its sqlite database.
-	// $getDataFunction expects 1 argument which defines what data it wants
-	// and can be "userlist" or "usertoken:username"
-	// $putDataFunciton expects 2 arguments, $1 is data type, $2 is the data
-	// $1 can be "changetoken:username", "removetoken:username", $2 is the token
-	// data in some encoded form
-	// tokenDATA will be like HOTP;KEY;CID where CID is the current counter value
-	// why encode like this? i cant think of a good reason tbh, i should probably just
-	// use php's arry encoder functions  
-	function __construct($getDataFunction, $putDataFunction) {
-		$this->putDataFunction = $putDataFunction;
-		$this->getDataFunction = $getDataFunction;
+	function __construct() {
 	}
 	
-	// this could get ugly for large databases.. we'll worry about that if it ever happens.
-	function getUserList() {
-		$func = $this->getDataFunction;
-		return $func("userlist", "");
+	abstract function getData($username);
+	abstract function putData($username, $data);
+	abstract function getUsers();
+	
+	// a function to create an empty data structure, filled with some defaults
+	function createEmptyData() {
+		$data["tokenkey"] = ""; // the token key
+		$data["tokentype"] = "HOTP"; // the token type
+		$data["tokentimer"] = 30; // the token timer (For totp) and not supported by ga yet		
+		$data["tokencounter"] = 1; // the token counter for hotp
+		$data["tokenalgorithm"] = "SHA1"; // the token algorithm (not supported by ga yet)
+		
+		return $data;
 	}
 	
+	// an internal funciton to get 
+	function internalGetData($username) {
+		$data = $this->getData($username);
+		$deco = unserialize(base64_decode($data));
+		
+		if(!$deco) {
+			$deco = $this->createEmptyData();
+		}
+		
+		return $deco;
+	}
+	
+
+	function internalPutData($username, $data) {
+		$enco = base64_encode(serialize($data));
+		
+		return $this->putData($username, $enco);
+	}
+	
+
 	// set the token type the user it going to use.
 	// this defaults to HOTP - we only do 30s token
 	// so lets not be able to set that yet
@@ -59,10 +66,9 @@ class GoogleAuthenticator {
 			return false;
 		}
 		
-		$put["username"] = $username;
-		$put["tokentype"] = $tokentype;
-		$func = $this->putDataFunction;
-		$func("settokentype", $put);
+		$data = $this->internalGetData($username);
+		$data["tokentype"] = $tokentype;
+		$this->internalPutData($username, $data);
 		
 		return true;	
 	}
@@ -73,13 +79,11 @@ class GoogleAuthenticator {
 		if($key == "") $key = $this->createBase32Key();
 		$hkey = $this->helperb322hex($key);
 		
-		$token["username"] = $username;
+		$token = $this->internalGetData($username);
 		$token["tokenkey"] = $hkey;
 		$token["tokentype"] = $ttype;
 		
-		$func = $this->putDataFunction;
-		$func("setusertoken", $token);
-		
+		$this->internalPutData($username, $token);		
 		return $key;
 	}
 	
@@ -89,6 +93,9 @@ class GoogleAuthenticator {
 	// if the key is invalid or the user doesn't exist.
 	function setUserKey($username, $key) {
 		// consider scrapping this
+		$token = $this->internalGetData($username);
+		$token["tokenkey"] = $key;
+		$this->internalPutData($username, $token);		
 	}
 	
 	
@@ -100,21 +107,33 @@ class GoogleAuthenticator {
 	
 	// self explanitory?
 	function deleteUser($username) {
-		$func = $this->putDataFunction;
-		$func("deleteusertoken", $username);
+		// oh, we need to figure out how to do thi?
+		$data = $this->internalGetData($username);
+		$data["tokenkey"] = "";
+		$this->internalPutData($username);		
 	}
 	
 	// user has input their user name and some code, authenticate
 	// it
 	function authenticateUser($username, $code) {
+
+		error_log("begin auth user");
+		$tokendata = $this->internalGetData($username);
+		$asdf = print_r($tokendata, true);
+		error_log("dat is $asdf");
 		
-		$func = $this->getDataFunction;
-		$tokendata = $func("gettoken", $username);
+		if($tokendata["tokenkey"] == "") {
+			$errorText = "No Assigned Token";
+			return false;
+		}
 		
 		// TODO: check return value
 		$ttype = $tokendata["tokentype"];
 		$tlid = $tokendata["tokencounter"];
 		$tkey = $tokendata["tokenkey"];
+		
+		$asdf = print_r($tokendata, true);
+		error_log("dat is $asdf");
 		switch($ttype) {
 			case "HOTP":
 				$st = $tlid;
@@ -123,11 +142,8 @@ class GoogleAuthenticator {
 					$stest = $this->oath_hotp($tkey, $i);
 					//error_log("code: $code, $stest, $tkey, $tid");
 					if($code == $stest) {
-						$tokenset["username"] = $username;
-						$tokenset["tokencounter"] = $i;
-						
-						$func = $this->putDataFunction;
-						$func("settokencounter", $tokenset);
+						$tokendata["tokencounter"] = $i;
+						$this->internalPutData($username, $tokendata);
 						return true;
 					}
 				}
@@ -168,14 +184,17 @@ class GoogleAuthenticator {
 		// for keys
 		
 		//		$this->dbConnector->query('CREATE TABLE "tokens" ("token_id" INTEGER PRIMARY KEY AUTOINCREMENT,"token_key" TEXT NOT NULL, "token_type" TEXT NOT NULL, "token_lastid" INTEGER NOT NULL)');
-		
-		$func = $this->getDataFunction;
-		$tokendata = $func("gettoken", $username);
+		$tokendata = internalGetData($username);
 		
 		// TODO: check return value
 		$ttype = $tokendata["tokentype"];
 		$tlid = $tokendata["tokencounter"];
 		$tkey = $tokendata["tokenkey"];
+		
+		if($tkey == "") {
+			$this->errorText = "No Assigned Token";
+			return false;
+		}
 		
 		switch($ttype) {
 			case "HOTP":
@@ -187,11 +206,8 @@ class GoogleAuthenticator {
 					if($code1 == $stest) {
 						$stest2 = $this->oath_hotp($tkey, $i+1);
 						if($code2 == $stest2) {
-							$tokenset["username"] = $username;
-							$tokenset["tokencounter"] = $i+1;
-						
-							$func = $this->putDataFunction;
-							$func("settokencounter", $tokenset);
+							$tokendata["tokencounter"] = $i+1;
+							internalPutData($username, $tokendata);						
 							return true;
 						}
 					}
@@ -205,7 +221,6 @@ class GoogleAuthenticator {
 		}
 		
 		return false;
-		
 	}
 	
 	// gets the error text associated with the last error
