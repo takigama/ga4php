@@ -1,0 +1,21 @@
+#How to use GA4PHP in your app
+
+= How To Implement =
+
+This section describes how to implement GA4PHP in your application
+
+
+= The Step by Step Guide =
+
+(checkout the example in the examples directory)
+
+First, download GA4PHP. All thats really required is the lib.php file that comes with it. This is an abstract class that requires you to overload three methods. Two are required for the application to work, one is optional and doesn't really be used yet.
+
+So, create your own class and sub-class GoogleAuthenticator, like so:
+
+`
+class MyGoogleAuthenticator extends GoogleAuthenticator {
+...
+}
+`
+Now we define
