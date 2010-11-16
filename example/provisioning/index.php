@@ -148,7 +148,7 @@ closedatabase($db);
 <input type="submit" name="Auth" value="Auth">
 </select>
 
-
+<hr>
 <pre>
 <?php 
 
