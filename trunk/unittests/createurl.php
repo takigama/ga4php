@@ -1,6 +1,6 @@
 <?php
 
-require_once("../lib/lib.php");
+require_once("../lib/ga4php.php");
 
 $ga = new GoogleAuthenticator("/dev/null");
 

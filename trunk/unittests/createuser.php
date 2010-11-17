@@ -1,5 +1,5 @@
 <?php
-require_once("../lib/lib.php");
+require_once("../lib/ga4php.php");
 
 $dbfile = "/tmp/db.sqlite";
 

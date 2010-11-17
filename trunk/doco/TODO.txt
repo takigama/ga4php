@@ -5,7 +5,6 @@ The Almighty TODO list:
 2) a "hasToken" method for determining if a user has a token or not
 3) implement googles key integrity algorithm thing
 4) make a better example
-5) rename lib.php to something more appropriate
 
 Maybe:
 Move to exceptions

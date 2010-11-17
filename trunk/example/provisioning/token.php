@@ -1,6 +1,6 @@
 <?php
 
-require_once("../../lib/lib.php");
+require_once("../../lib/ga4php.php");
 
 // define our token class
 class myGA extends GoogleAuthenticator {
