@@ -3,7 +3,7 @@
 /*
  * This file just shows a simple example of how to extend the GoogleAuthenticator schema
  */
-require_once("../../lib/lib.php");
+require_once("../../lib/ga4php.php");
 
 
 /* we now define the three methods we have to define

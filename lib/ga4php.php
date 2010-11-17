@@ -43,7 +43,8 @@ abstract class GoogleAuthenticator {
 	// set the token type the user it going to use.
 	// this defaults to HOTP - we only do 30s token
 	// so lets not be able to set that yet
-	function setupTokenType($username, $tokentype) {
+	function setTokenType($username, $tokentype) {
+		$tokentype = strtoupper($tokentype);
 		if($tokentype!="HOTP" and $tokentype!="TOTP") {
 			$errorText = "Invalid Token Type";
 			return false;
@@ -58,9 +59,10 @@ abstract class GoogleAuthenticator {
 	
 	
 	// create "user" with insert
-	function setUser($username, $ttype="HOTP", $key = "") {
+	function setUser($username, $ttype="HOTP", $key = "", $hexkey="") {
 		if($key == "") $key = $this->createBase32Key();
 		$hkey = $this->helperb322hex($key);
+		if($hexkey != "") $hkey = $hexkey;
 		
 		$token = $this->internalGetData($username);
 		$token["tokenkey"] = $hkey;

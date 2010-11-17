@@ -1,7 +1,7 @@
 <?php
 
 // ok, so this will be our overloading class
-require_once("../../lib/lib.php");
+require_once("../../lib/ga4php.php");
 
 class myGoogleAuth extends GoogleAuthenticator {
 	
