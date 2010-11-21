@@ -1,0 +1,12 @@
+# The Radius Authenticator
+
+= Introduction =
+
+The radius authenticator code is pretty immature. What it is is really just a website for provisioning based on some pre-existing backend (you provide the backend) and a script that can then be run to check the auth values.
+
+
+= How to use it =
+
+... TODO ...
+
+As the code doesn't actually yet exist theres not much to write yet. Check back later.
