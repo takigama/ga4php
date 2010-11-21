@@ -11,3 +11,5 @@
  * then user admin would be less disconnected. I.e. if a user was deleted from AD, their token
  * data should disappear with them.
  */
+
+?>

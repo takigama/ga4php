@@ -2,7 +2,21 @@
 
 abstract class GoogleAuthenticator {
 	
-	function __construct() {
+	function __construct($totpskew=1, $hotpskew=10, $hotphuntvalue=200000) {
+		// the hotpskew is how many tokens forward we look to find the input
+		// code the user used
+		$this->hotpSkew = $hotpskew;
+		
+		// the totpskew value is how many tokens either side of the current
+		// token we should check, based on a time skew.
+		$this->totpSkew = $totpskew;
+		
+		// the hotphuntvalue is what we use to resync tokens.
+		// when a user resyncs, we search from 0 to $hutphutvalue to find
+		// the two token codes the user has entered - 200000 seems like overkill
+		// really as i cant imagine any token out there would ever make it
+		// past 200000 token code requests.
+		$this->hotpHuntValue = $hotphuntvalue;
 	}
 	
 	abstract function getData($username);
@@ -53,9 +67,8 @@ abstract class GoogleAuthenticator {
 		
 		$data = $this->internalGetData($username);
 		$data["tokentype"] = $tokentype;
-		$this->internalPutData($username, $data);
+		return $this->internalPutData($username, $data);
 		
-		return true;	
 	}
 	
 	
@@ -69,7 +82,9 @@ abstract class GoogleAuthenticator {
 		$token["tokenkey"] = $hkey;
 		$token["tokentype"] = $ttype;
 		
-		$this->internalPutData($username, $token);		
+		if(!$this->internalPutData($username, $token)) {
+			return false;
+		}		
 		return $key;
 	}
 	
@@ -128,7 +143,7 @@ abstract class GoogleAuthenticator {
 			case "HOTP":
 				error_log("in hotp");
 				$st = $tlid;
-				$en = $tlid+20;
+				$en = $tlid+$this->hotpSkew;
 				for($i=$st; $i<$en; $i++) {
 					$stest = $this->oath_hotp($tkey, $i);
 					error_log("testing code: $code, $stest, $tkey, $tid");
@@ -143,10 +158,10 @@ abstract class GoogleAuthenticator {
 			case "TOTP":
 				error_log("in totp");
 				$t_now = time();
-				$t_ear = $t_now - 45;
-				$t_lat = $t_now + 60;
-				$t_st = ((int)($t_ear/30));
-				$t_en = ((int)($t_lat/30));
+				$t_ear = $t_now - ($this->totpSkew*$tokendata["tokentimer"]);
+				$t_lat = $t_now + ($this->totpSkew*$tokendata["tokentimer"]);
+				$t_st = ((int)($t_ear/$tokendata["tokentimer"]));
+				$t_en = ((int)($t_lat/$tokendata["tokentimer"]));
 				//error_log("kmac: $t_now, $t_ear, $t_lat, $t_st, $t_en");
 				for($i=$t_st; $i<=$t_en; $i++) {
 					$stest = $this->oath_hotp($tkey, $i);
@@ -157,7 +172,7 @@ abstract class GoogleAuthenticator {
 				}
 				break;
 			default:
-				echo "how the frig did i end up here?";
+				return false;
 		}
 		
 		return false;
@@ -191,7 +206,7 @@ abstract class GoogleAuthenticator {
 		switch($ttype) {
 			case "HOTP":
 				$st = 0;
-				$en = 200000;
+				$en = $this->hotpHuntValue;
 				for($i=$st; $i<$en; $i++) {
 					$stest = $this->oath_hotp($tkey, $i);
 					//echo "code: $code, $stest, $tkey\n";
@@ -268,6 +283,7 @@ abstract class GoogleAuthenticator {
 	}
 	
 	
+	// TODO: lots of error checking goes in here
 	function helperb322hex($b32) {
         $alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 
@@ -298,6 +314,7 @@ abstract class GoogleAuthenticator {
         return $out2;
 	}
 	
+	// TODO: lots of error checking goes in here
 	function helperhex2b32($hex) {
         $alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 
@@ -321,6 +338,10 @@ abstract class GoogleAuthenticator {
         return $out2;
 	}
 	
+	// i've put alot of faith in the code from the
+	// php site's examples for the hash_hmac algorithm
+	// i assume its mostly correct but i should do
+	// some testing to verify this is actually the case
 	function oath_hotp($key, $counter)
 	{
 		$key = pack("H*", $key);
@@ -341,6 +362,7 @@ abstract class GoogleAuthenticator {
 	    $hash = hash_hmac ('sha1', $bin_counter, $key);
 	    return str_pad($this->oath_truncate($hash), 6, "0", STR_PAD_LEFT);
 	}
+	
 	
 	function oath_truncate($hash, $length = 6)
 	{
@@ -369,6 +391,12 @@ abstract class GoogleAuthenticator {
 	private $putDatafunction;
 	private $errorText;
 	private $errorCode;
+	
+	private $hotpSkew;
+	private $totpSkew;
+	
+	private $hotpHuntValue;
+	
 	
 	/*
 	 * error codes
