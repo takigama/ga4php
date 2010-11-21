@@ -16,6 +16,7 @@ abstract class GoogleAuthenticator {
 		$data["tokentimer"] = 30; // the token timer (For totp) and not supported by ga yet		
 		$data["tokencounter"] = 1; // the token counter for hotp
 		$data["tokenalgorithm"] = "SHA1"; // the token algorithm (not supported by ga yet)
+		$data["user1"] = ""; // a place for implementors to store their own data
 		
 		return $data;
 	}
@@ -106,10 +107,10 @@ abstract class GoogleAuthenticator {
 	function authenticateUser($username, $code) {
 
 		if(preg_match("/[0-9][0-9][0-9][0-9][0-9][0-9]/",$code)<1) return false;
-		error_log("begin auth user");
+		//error_log("begin auth user");
 		$tokendata = $this->internalGetData($username);
-		$asdf = print_r($tokendata, true);
-		error_log("dat is $asdf");
+		//$asdf = print_r($tokendata, true);
+		//error_log("dat is $asdf");
 		
 		if($tokendata["tokenkey"] == "") {
 			$errorText = "No Assigned Token";
@@ -121,8 +122,8 @@ abstract class GoogleAuthenticator {
 		$tlid = $tokendata["tokencounter"];
 		$tkey = $tokendata["tokenkey"];
 		
-		$asdf = print_r($tokendata, true);
-		error_log("dat is $asdf");
+		//$asdf = print_r($tokendata, true);
+		//error_log("dat is $asdf");
 		switch($ttype) {
 			case "HOTP":
 				error_log("in hotp");
@@ -206,6 +207,7 @@ abstract class GoogleAuthenticator {
 				return false;
 				break;
 			case "TOTP":
+				// ignore it?
 				break;
 			default:
 				echo "how the frig did i end up here?";
@@ -225,9 +227,10 @@ abstract class GoogleAuthenticator {
 		$data = $this->internalGetData($user);
 		$toktype = $data["tokentype"];
 		$key = $this->helperhex2b32($data["tokenkey"]);
+		$counter = $data["tokencounter"];
 		$toktype = strtolower($toktype);
 		if($toktype == "hotp") {
-			$url = "otpauth://$toktype/$user?secret=$key&counter=1";
+			$url = "otpauth://$toktype/$user?secret=$key&counter=$counter";
 		} else {
 			$url = "otpauth://$toktype/$user?secret=$key";
 		}
