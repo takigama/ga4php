@@ -2,9 +2,8 @@ The Almighty TODO list:
 
 1) Error checking, lots of error checking and sanity checking Then i need to setup error codes and stuff.
 1.1) put code comments in all the examples
-2) a "hasToken" method for determining if a user has a token or not
 3) implement googles key integrity algorithm thing
-4) make a better example
+4) make better examples
 
 Maybe:
 Move to exceptions
