@@ -19,6 +19,8 @@ abstract class GoogleAuthenticator {
 		$this->hotpHuntValue = $hotphuntvalue;
 	}
 	
+	// pure abstract functions that need to be overloaded when
+	// creating a sub class
 	abstract function getData($username);
 	abstract function putData($username, $data);
 	abstract function getUsers();
@@ -30,12 +32,13 @@ abstract class GoogleAuthenticator {
 		$data["tokentimer"] = 30; // the token timer (For totp) and not supported by ga yet		
 		$data["tokencounter"] = 1; // the token counter for hotp
 		$data["tokenalgorithm"] = "SHA1"; // the token algorithm (not supported by ga yet)
-		$data["user1"] = ""; // a place for implementors to store their own data
+		$data["user"] = ""; // a place for implementors to store their own data
 		
 		return $data;
 	}
 	
-	// an internal funciton to get 
+	// an internal funciton to get data from the overloaded functions
+	// and turn them into php arrays.
 	function internalGetData($username) {
 		$data = $this->getData($username);
 		$deco = unserialize(base64_decode($data));
@@ -47,7 +50,8 @@ abstract class GoogleAuthenticator {
 		return $deco;
 	}
 	
-
+	// the function used inside the class to put the data into the
+	// datastore using the overloaded data saving class
 	function internalPutData($username, $data) {
 		$enco = base64_encode(serialize($data));
 		
@@ -60,7 +64,7 @@ abstract class GoogleAuthenticator {
 	// so lets not be able to set that yet
 	function setTokenType($username, $tokentype) {
 		$tokentype = strtoupper($tokentype);
-		if($tokentype!="HOTP" and $tokentype!="TOTP") {
+		if($tokentype!="HOTP" && $tokentype!="TOTP") {
 			$errorText = "Invalid Token Type";
 			return false;
 		}
@@ -74,6 +78,8 @@ abstract class GoogleAuthenticator {
 	
 	// create "user" with insert
 	function setUser($username, $ttype="HOTP", $key = "", $hexkey="") {
+		$ttype  = strtoupper($ttype);
+		if($ttype != "HOTP" && $ttype !="TOTP") return false;
 		if($key == "") $key = $this->createBase32Key();
 		$hkey = $this->helperb322hex($key);
 		if($hexkey != "") $hkey = $hexkey;
@@ -88,7 +94,7 @@ abstract class GoogleAuthenticator {
 		return $key;
 	}
 	
-	
+	// a function to determine if the user has an actual token
 	function hasToken($username) {
 		$token = $this->internalGetData($username);
 		// TODO: change this to a pattern match for an actual key
