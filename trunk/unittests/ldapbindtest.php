@@ -1,27 +1,49 @@
 <?php 
 
 // just trying to test how extensionAttributes work in AD. they seem to be exactly what we're looking for in terms of a place to plonk our data
-$ds = ldap_connect("------", 389);
+require_once("../../../.dontappearingitandsvn.php");
+$ds = ldap_connect("$host", 389);
 if($ds) {
-	$r = ldap_bind($ds, "-----", "-----");
+	$r = ldap_bind($ds, "$binduser", "$bindpass");
 	if($r) {
 		echo "r is r\n";
 	} else {
 		echo "r is not r\n";
 	}
 	
-	//$sr = ldap_search($ds, "CN=administrator, CN=Users, ----", "objectclass=*");
+	$sr = ldap_search($ds, "$basecn", "objectclass=user");
 	
-	//if($sr) {
-//		echo "sr is sr\n";
-	//}
+	if($sr) {
+		echo "sr is sr\n";
+	}
 	
-	//$info = ldap_get_entries($ds, $sr);
-	$info["extensionattribute2"] = "-----";
+	$info = ldap_get_entries($ds, $sr);
+	//$info["extensionattribute2"] = "-----";
 	
-	ldap_modify($ds, "CN=administrator, CN=Users, dc=safeneter, dc=int", $info);
 	
 	//print_r($info);
+	$i = 0;
+	foreach($info as $key => $val) {
+		//echo "$key is ".$val["distinguishedname"][0]."\n";
+		if($val["distinguishedname"][0] != "") {
+			$user[$i]["dn"] = $val["distinguishedname"][0];
+			$user[$i]["acn"] = $val["samaccountname"][0];
+		}
+
+		$i ++;
+		//return 0;
+	}
+	
+	foreach($user as $value) {
+		$cn = $value["dn"];
+		$sr2 = ldap_search($ds, "$cn", "objectclass=*");
+		$info = ldap_get_entries($ds, $sr2);
+		print_r($info);
+		return 0;
+	}
+	
+	print_r($user);
+	
 }
 
 ?>
