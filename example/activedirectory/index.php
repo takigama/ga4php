@@ -4,7 +4,16 @@
  * AD has several attributes you can use for storing your own data, and
  * thats what we use
  * 
- * This is only the beginning code, 
+ * This is only the beginning code, for starters we need some way of encrypting
+ * the data we put in AD cause the extensionAttributes1-15 are globally readable
+ * and thus the token is completely insecure. This is easy to fix though as the
+ * encryption just needs to be a static set key within the class that puts/gets
+ * data. At least, for the example we should set a GOOD example and do this
+ * other implementations might even want to implement their own schema such that
+ * permissions around that token key are strict in the schema, however encrypting
+ * the data is not a bad idea. The key for the encrypted data can be very long
+ * and very random as its not designed for user interaction, though it should be
+ * backed up occasionally
  */
 
 // set these

@@ -3,6 +3,7 @@
 require_once("../../lib/ga4php.php");
 
 // TODO: This code works, but needs to be fixed and commented properly
+// TODO: setup encryption into AD
 
 
 // define our token class
