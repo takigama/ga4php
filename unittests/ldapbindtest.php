@@ -1,8 +1,16 @@
 <?php 
 
 // just trying to test how extensionAttributes work in AD. they seem to be exactly what we're looking for in terms of a place to plonk our data
-require_once("../../../.dontappearingitandsvn.php");
+$host = ""; // for eg "1.2.3.4"
+$binduser = ""; // for eg "administrator"
+$bindpass = ""; // for eg "password"
+$basecn = ""; // for eg "CN=users, DC=google, dc=com"
+
+// this is here so i can keep my atributes somewhere in the tree and not have them float around on git/svn
+if(file_exists("../../../.dontappearingitandsvn.php")) require_once("../../../.dontappearingitandsvn.php");
+
 $ds = ldap_connect("$host", 389);
+
 if($ds) {
 	$r = ldap_bind($ds, "$binduser", "$bindpass");
 	if($r) {
