@@ -69,14 +69,14 @@ cd $MYTMPDIR
 svn checkout http://ga4php.googlecode.com/svn/trunk/authserver authserver > /dev/null 2>&1
 if [ "$?" != "0" ]
 then
-	echo "There was a problem downloading the source code.. bailing"
+	echo "There was a problem downloading the authserver source code.. bailing"
 	exit 2
 fi
 
 svn checkout http://ga4php.googlecode.com/svn/trunk/contrib contrib > /dev/null 2>&1
 if [ "$?" != "0" ]
 then
-	echo "There was a problem downloading the source code.. bailing"
+	echo "There was a problem downloading the contrib source code.. bailing"
 	exit 2
 fi
 
