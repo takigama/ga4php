@@ -1,10 +1,18 @@
 = Introduction =
 
-The radius authenticator code is pretty immature. What it is is really just a website for provisioning based on some pre-existing backend (you provide the backend) and a script that can then be run to check the auth values.
+The radius authenticator exists in the subdirectory "authserver". It'll have a couple of goals:
+
+* connect to various backends for auth (i.e. AD, ldap, etc)
+* use multiple storage types (sqlite, mysql, ldap, ad)
+* allow for user based provisioning (self-provisioning)
+* simple deployment
 
 
-= How to use it =
+What it will do day one:
 
-... TODO ...
-
-As the code doesn't actually yet exist theres not much to write yet. Check back later.
+* simple web interface for provisioning users
+* simple web interface that takes over freeradius config
+* one-time url for users to get their tokens from
+* ability to add non-ga tokens (i.e. direct string input)
+* simple script that downloads (via apt-get) required components and gets gaas via svn for installation.
+* provide a radius server (Freeradius) to authenticate against (only passcodes)
