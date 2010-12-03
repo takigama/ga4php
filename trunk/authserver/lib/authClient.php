@@ -4,7 +4,7 @@ require_once("lib.php");
 
 class GAAuthClient {
 	
-	function setUserToke($username, $token) {
+	function setUserToken($username, $token) {
 		
 	}
 	
