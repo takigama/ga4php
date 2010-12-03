@@ -4,29 +4,32 @@ if(!isset($MSG_QUEUE_KEY_ID_SERVER)) $MSG_QUEUE_KEY_ID_SERVER = "189751072";
 if(!isset($MSG_QUEUE_KEY_ID_CLIENT)) $MSG_QUEUE_KEY_ID_CLIENT = "189751073";
 global $MSG_QUEUE_KEY_ID_SERVER, $MSG_QUEUE_KEY_ID_CLIENT;
 
-define("MSG_AUTH_USER", 1);
-define("MSG_ADD_USER", 2);
-define("MSG_DELETE_USER", 2);
-
+define("MSG_AUTH_USER_TOKEN", 1);
+define("MSG_ADD_USER_TOKEN", 2);
+define("MSG_DELETE_USER", 3);
+define("MSG_AUTH_USER_PASSWORD", 4);
+define("MSG_SET_USER_PASSWORD", 5);
+define("MSG_SET_USER_REALNAME", 6);
+define("MSG_SET_USER_TOKEN", 7);
 
 if(file_exists("../../lib/ga4php.php")) require_once("../../lib/ga4php.php");
 if(file_exists("../lib/ga4php.php")) require_once("../lib/ga4php.php");
 
 function getDatabase() {
 	$dbobject = false;
-	if(file_exists("/tmp/gadata.sqlite")) {
+	if(file_exists("gaasdata.sqlite")) {
 		try {
-			$dbobject = new PDO("sqlite:/tmp/gadata.sqlite");
+			$dbobject = new PDO("sqlite:gaasdata.sqlite");
 		} catch(PDOException $exep) {
 			error_log("execpt on db open");
 		}
 	} else {
 		try {
-			$dbobject = new PDO("sqlite:/tmp/gadata.sqlite");
+			$dbobject = new PDO("sqlite:gaasdata.sqlite");
 		} catch(PDOException $exep) {
 			error_log("execpt on db open");
 		}
-		$sql = 'CREATE TABLE "users" ("users_id" INTEGER PRIMARY KEY AUTOINCREMENT,"users_username" TEXT,"users_tokendata" TEXT);';
+		$sql = 'CREATE TABLE "users" ("users_id" INTEGER PRIMARY KEY AUTOINCREMENT,"users_username" TEXT, "users_realname" TEXT, "users_password" TEXT, "users_tokendata" TEXT);';
 		$dbobject->query($sql);
 	}
 	
@@ -66,33 +69,27 @@ class gaasGA extends GoogleAuthenticator {
 	}
 	
 	
-	// now we need a function for putting the data back into our user table.
-	// in this example, we wont check anything, we'll just overwrite it.
 	function putData($username, $data) {
 		// get our database connection
 		$dbObject = getDatabase();
 		
-		// set the sql for updating the data
-		// token data is stored as a base64 encoded string, it should
-		// not need to be escaped in any way prior to storing in a database
-		// but feel free to call your databases "addslashes" (or whatever)
-		// function on $data prior to doing the SQL.
-		$sql = "delete from users where users_username='$username'";
-		$dbObject->query($sql);
+		// we need to check if the user exists, and if so put the data, if not create the data
+		$sql = "select * from users where users_username='$username'";
+		$res = $dbOject->query($sql);
+		if($res->fetchColumn() > 0) {
+			// do update
+			$sql = "update users set users_tokendata='$data' where users_username='$username'";
+		} else {
+			// do insert
+			$sql = "insert into users values (NULL, '$username', '', '', '$data')";
+		}
 		
-		$sql = "insert into users values (NULL, '$username', '$data')";
-		
-		
-		// now execute the sql and return straight away - you should probably
-		// clean up after yourselves, but im going to assume pdo does this
-		// for us anyway in this exmaple
 		if($dbObject->query($sql)) {
 			return true;
 		} else {
 			return false;
 		}
-		
-		// even simpler!
+
 	}
 	
 	function getUsers() {
