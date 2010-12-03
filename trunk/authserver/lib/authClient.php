@@ -3,6 +3,27 @@
 require_once("lib.php");
 
 class GAAuthClient {
+	
+	function setUserToke($username, $token) {
+		
+	}
+	
+	function setUserPass($username, $password) {
+		
+	}
+	
+	function authUserPass($username, $password) {
+		
+	}
+	
+	function deleteUser($username) {
+		
+	}
+	
+	function setUserRealName($username, $realname) {
+		
+	}
+	
 	function authUser($username, $passcode) {
 		global $MSG_QUEUE_KEY_ID_SERVER, $MSG_QUEUE_KEY_ID_CLIENT;
 		
@@ -11,6 +32,9 @@ class GAAuthClient {
 			return false;
 		}
 
+		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_CLIENT)) {
+			return false;
+		}
 		// TODO we need to setup a client queue sem lock here
 		
 		$cl_queue = msg_get_queue($MSG_QUEUE_KEY_ID_CLIENT);
@@ -38,6 +62,10 @@ class GAAuthClient {
 			return false;
 		}
 
+		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_CLIENT)) {
+			return false;
+		}
+		
 		// TODO we need to setup a client queue sem lock here
 		
 		$cl_queue = msg_get_queue($MSG_QUEUE_KEY_ID_CLIENT);

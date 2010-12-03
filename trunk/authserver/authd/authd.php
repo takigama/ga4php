@@ -40,29 +40,30 @@ if($pid == -1) {
 	
 	while(true) {
 		msg_receive($sr_queue, 0, $msg_type, 16384, $msg);
-		echo "Got message $msg_type\n";
 		print_r($msg);
 		switch($msg_type) {
 			case MSG_AUTH_USER:
-				echo "got auth message, $msg\n";
+				// minimal checking, we leav it up to authenticateUser to do the real
+				// checking
+				if(!isset($msg["user"])) $msg["user"] = "";
+				if(!isset($msg["passcode"])) $msg["passcode"] = "";
 				$username = $msg["user"];
 				$passcode = $msg["passcode"];
 				global $myga;
 				msg_send($cl_queue, MSG_AUTH_USER, $myga->authenticateUser($username, $passcode));
 				break;
 			case MSG_ADD_USER:
-				echo "add user\n";
-				$username = $msg["username"];
-				global $myga;
-				msg_send($cl_queue, MSG_ADD_USER, $myga->setUser($username));
+				if(!isset($msg["username"])) {
+					msg_send($cl_queue, MSG_ADD_USER, false);	
+				} else {
+					$username = $msg["username"];				
+					global $myga;
+					msg_send($cl_queue, MSG_ADD_USER, $myga->setUser($username));
+				}
 				break;
 			case MSG_DELETE_USER:
 				break;
-			default:
-				echo "um??\n";
-				
 		}		
-		echo "Back to wait\n";
 	}	
 }
 
