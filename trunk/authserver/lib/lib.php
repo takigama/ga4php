@@ -11,6 +11,7 @@ define("MSG_AUTH_USER_PASSWORD", 4);
 define("MSG_SET_USER_PASSWORD", 5);
 define("MSG_SET_USER_REALNAME", 6);
 define("MSG_SET_USER_TOKEN", 7);
+define("MSG_SET_USER_TOKEN_TYPE", 8);
 
 if(file_exists("../../lib/ga4php.php")) require_once("../../lib/ga4php.php");
 if(file_exists("../lib/ga4php.php")) require_once("../lib/ga4php.php");

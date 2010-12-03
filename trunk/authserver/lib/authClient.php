@@ -5,26 +5,96 @@ require_once("lib.php");
 class GAAuthClient {
 	
 	function setUserToken($username, $token) {
+		global $MSG_QUEUE_KEY_ID_SERVER, $MSG_QUEUE_KEY_ID_CLIENT;
+		
+		
+		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_SERVER)) {
+			return false;
+		}
+
+		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_CLIENT)) {
+			return false;
+		}
+		// TODO we need to setup a client queue sem lock here
+		
+		$cl_queue = msg_get_queue($MSG_QUEUE_KEY_ID_CLIENT);
+		$sr_queue = msg_get_queue($MSG_QUEUE_KEY_ID_SERVER);
 		
 	}
 	
 	function setUserPass($username, $password) {
+		global $MSG_QUEUE_KEY_ID_SERVER, $MSG_QUEUE_KEY_ID_CLIENT;
+		
+		
+		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_SERVER)) {
+			return false;
+		}
+
+		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_CLIENT)) {
+			return false;
+		}
+		// TODO we need to setup a client queue sem lock here
+		
+		$cl_queue = msg_get_queue($MSG_QUEUE_KEY_ID_CLIENT);
+		$sr_queue = msg_get_queue($MSG_QUEUE_KEY_ID_SERVER);
 		
 	}
 	
 	function authUserPass($username, $password) {
+		global $MSG_QUEUE_KEY_ID_SERVER, $MSG_QUEUE_KEY_ID_CLIENT;
+		
+		
+		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_SERVER)) {
+			return false;
+		}
+
+		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_CLIENT)) {
+			return false;
+		}
+		// TODO we need to setup a client queue sem lock here
+		
+		$cl_queue = msg_get_queue($MSG_QUEUE_KEY_ID_CLIENT);
+		$sr_queue = msg_get_queue($MSG_QUEUE_KEY_ID_SERVER);
 		
 	}
 	
 	function deleteUser($username) {
+		global $MSG_QUEUE_KEY_ID_SERVER, $MSG_QUEUE_KEY_ID_CLIENT;
+		
+		
+		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_SERVER)) {
+			return false;
+		}
+
+		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_CLIENT)) {
+			return false;
+		}
+		// TODO we need to setup a client queue sem lock here
+		
+		$cl_queue = msg_get_queue($MSG_QUEUE_KEY_ID_CLIENT);
+		$sr_queue = msg_get_queue($MSG_QUEUE_KEY_ID_SERVER);
 		
 	}
 	
 	function setUserRealName($username, $realname) {
+		global $MSG_QUEUE_KEY_ID_SERVER, $MSG_QUEUE_KEY_ID_CLIENT;
+		
+		
+		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_SERVER)) {
+			return false;
+		}
+
+		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_CLIENT)) {
+			return false;
+		}
+		// TODO we need to setup a client queue sem lock here
+		
+		$cl_queue = msg_get_queue($MSG_QUEUE_KEY_ID_CLIENT);
+		$sr_queue = msg_get_queue($MSG_QUEUE_KEY_ID_SERVER);
 		
 	}
 	
-	function authUser($username, $passcode) {
+	function authUserToken($username, $passcode) {
 		global $MSG_QUEUE_KEY_ID_SERVER, $MSG_QUEUE_KEY_ID_CLIENT;
 		
 		
@@ -51,7 +121,7 @@ class GAAuthClient {
 		echo "message received?\n";
 		print_r($msg);
 		
-		return false;
+		return $msg;
 	}
 	
 	function addUser($username) {
@@ -81,7 +151,30 @@ class GAAuthClient {
 		echo "message received?\n";
 		print_r($msg);
 		
-		return false;
+		return $msg;
+		
+	}
+
+	function setTokenType($username, $tokentype) {
+		global $MSG_QUEUE_KEY_ID_SERVER, $MSG_QUEUE_KEY_ID_CLIENT;
+		
+		
+		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_SERVER)) {
+			return false;
+		}
+
+		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_CLIENT)) {
+			return false;
+		}
+		
+		// TODO we need to setup a client queue sem lock here
+		
+		$cl_queue = msg_get_queue($MSG_QUEUE_KEY_ID_CLIENT);
+		$sr_queue = msg_get_queue($MSG_QUEUE_KEY_ID_SERVER);
+		
+		
+		$message["username"] = $username;
+		
 		
 	}
 }
