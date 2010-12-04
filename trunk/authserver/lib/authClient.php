@@ -20,6 +20,17 @@ class GAAuthClient {
 		$cl_queue = msg_get_queue($MSG_QUEUE_KEY_ID_CLIENT);
 		$sr_queue = msg_get_queue($MSG_QUEUE_KEY_ID_SERVER);
 		
+		$message["username"] = $username;
+		$message["token"] = $token;
+		
+		msg_send($sr_queue, MSG_SET_USER_TOKEN, $message, true, true, $msg_err);
+		echo "message sent\n";
+		
+		msg_receive($cl_queue, 0, $msg_type, 16384, $msg);
+		echo "message received?\n";
+		print_r($msg);
+		
+		
 	}
 	
 	function setUserPass($username, $password) {
@@ -37,7 +48,17 @@ class GAAuthClient {
 		
 		$cl_queue = msg_get_queue($MSG_QUEUE_KEY_ID_CLIENT);
 		$sr_queue = msg_get_queue($MSG_QUEUE_KEY_ID_SERVER);
+
+		$message["username"] = $username;
+		$message["password"] = $password;
 		
+		msg_send($sr_queue, MSG_SET_USER_PASSWORD, $message, true, true, $msg_err);
+		echo "message sent\n";
+		
+		msg_receive($cl_queue, 0, $msg_type, 16384, $msg);
+		echo "message received?\n";
+		print_r($msg);		
+	
 	}
 	
 	function authUserPass($username, $password) {
@@ -55,6 +76,16 @@ class GAAuthClient {
 		
 		$cl_queue = msg_get_queue($MSG_QUEUE_KEY_ID_CLIENT);
 		$sr_queue = msg_get_queue($MSG_QUEUE_KEY_ID_SERVER);
+
+		$message["username"] = $username;
+		$message["password"] = $password;
+		
+		msg_send($sr_queue, MSG_AUTH_USER_PASSWORD, $message, true, true, $msg_err);
+		echo "message sent\n";
+		
+		msg_receive($cl_queue, 0, $msg_type, 16384, $msg);
+		echo "message received?\n";
+		print_r($msg);
 		
 	}
 	
@@ -73,6 +104,15 @@ class GAAuthClient {
 		
 		$cl_queue = msg_get_queue($MSG_QUEUE_KEY_ID_CLIENT);
 		$sr_queue = msg_get_queue($MSG_QUEUE_KEY_ID_SERVER);
+
+		$message["username"] = $username;
+		
+		msg_send($sr_queue, MSG_DELETE_USER, $message, true, true, $msg_err);
+		echo "message sent\n";
+		
+		msg_receive($cl_queue, 0, $msg_type, 16384, $msg);
+		echo "message received?\n";
+		print_r($msg);
 		
 	}
 	
@@ -91,7 +131,43 @@ class GAAuthClient {
 		
 		$cl_queue = msg_get_queue($MSG_QUEUE_KEY_ID_CLIENT);
 		$sr_queue = msg_get_queue($MSG_QUEUE_KEY_ID_SERVER);
+
+		$message["username"] = $username;
+		$message["realname"] = $realname;
 		
+		msg_send($sr_queue, MSG_SET_USER_REALNAME, $message, true, true, $msg_err);
+		echo "message sent\n";
+		
+		msg_receive($cl_queue, 0, $msg_type, 16384, $msg);
+		echo "message received?\n";
+		print_r($msg);
+		
+	}
+	
+	function getUsers() {
+		global $MSG_QUEUE_KEY_ID_SERVER, $MSG_QUEUE_KEY_ID_CLIENT;
+		
+		
+		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_SERVER)) {
+			return false;
+		}
+
+		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_CLIENT)) {
+			return false;
+		}
+		// TODO we need to setup a client queue sem lock here
+		
+		$cl_queue = msg_get_queue($MSG_QUEUE_KEY_ID_CLIENT);
+		$sr_queue = msg_get_queue($MSG_QUEUE_KEY_ID_SERVER);
+		
+		msg_send($sr_queue, MSG_GET_USERS, "", true, true, $msg_err);
+		echo "message sent\n";
+		
+		msg_receive($cl_queue, 0, $msg_type, 16384, $msg);
+		echo "message received?\n";
+		print_r($msg);
+		
+		return $msg;
 	}
 	
 	function authUserToken($username, $passcode) {
@@ -111,7 +187,7 @@ class GAAuthClient {
 		$sr_queue = msg_get_queue($MSG_QUEUE_KEY_ID_SERVER);
 		
 		
-		$message["user"] = $username;
+		$message["username"] = $username;
 		$message["passcode"] = $passcode;
 		
 		msg_send($sr_queue, MSG_AUTH_USER, $message, true, true, $msg_err);
@@ -144,7 +220,7 @@ class GAAuthClient {
 		
 		$message["username"] = $username;
 		
-		msg_send($sr_queue, MSG_ADD_USER, $message, true, true, $msg_err);
+		msg_send($sr_queue, MSG_ADD_USER_TOKEN, $message, true, true, $msg_err);
 		echo "message sent\n";
 		
 		msg_receive($cl_queue, 0, $msg_type, 16384, $msg);
@@ -173,8 +249,18 @@ class GAAuthClient {
 		$sr_queue = msg_get_queue($MSG_QUEUE_KEY_ID_SERVER);
 		
 		
-		$message["username"] = $username;
 		
+		$message["username"] = $username;
+		$message["tokentype"] = $tokentype;
+		
+		msg_send($sr_queue, MSG_ADD_USER, $message, true, true, $msg_err);
+		echo "message sent\n";
+		
+		msg_receive($cl_queue, 0, $msg_type, 16384, $msg);
+		echo "message received?\n";
+		print_r($msg);
+		
+		return $msg;
 		
 	}
 }
