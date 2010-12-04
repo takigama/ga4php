@@ -215,7 +215,7 @@ if($pid == -1) {
 					}
 					$i++; 
 				}
-				msg_send($cl_queue, GET_USERS, $users);
+				msg_send($cl_queue, MSG_GET_USERS, $users);
 				
 				// TODO now set token 
 				break;
