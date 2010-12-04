@@ -163,7 +163,7 @@ class GAAuthClient {
 		msg_send($sr_queue, MSG_GET_USERS, "", true, true, $msg_err);
 		echo "message sent\n";
 		
-		msg_receive($cl_queue, 0, $msg_type, 16384, $msg);
+		msg_receive($cl_queue, 0, $msg_type, 524288, $msg);
 		echo "message received?\n";
 		print_r($msg);
 		
