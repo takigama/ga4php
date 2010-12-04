@@ -34,6 +34,7 @@ if(!isset($argv[1])) {
 	echo "\tsetname: setname <username> <realname> - sets the real name for a user\n";
 	echo "\tsettoken: settoken <username> <tokenkey> - sets the key (hex) for a token\n";
 	echo "\tsettype: settype <username> <tokentype> - sets a token type for a user\n";
+	echo "\tgetusers: getusers - gets a list of users\n";
 	return 0;	
 }
 
@@ -49,16 +50,25 @@ switch($argv[1]) {
 		$myAC->addUser($argv[2]);
 		break;
 	case "delete":
+		$myAC->deleteUser($argv[2]);
 		break;
 	case "authpass":
+		$myAC->authUserPass($argv[2], $argv[3]);
 		break;
 	case "setpass":
+		$myAC->setUserPass($argv[2], $argv[3]);
 		break;
 	case "setname":
+		$myAC->setUserRealName($argv[2], $argv[3]);
 		break;
 	case "settoken":
+		$myAC->setUserToken($argv[2], $argv[3]);
 		break;
 	case "settype":
+		$myAC->setUserTokenType($argv[2], $argv[3]);
+		break;
+	case "getusers":
+		$myAC->getUsers();
 		break;
 }
 ?>

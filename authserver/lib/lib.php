@@ -12,6 +12,7 @@ define("MSG_SET_USER_PASSWORD", 5);
 define("MSG_SET_USER_REALNAME", 6);
 define("MSG_SET_USER_TOKEN", 7);
 define("MSG_SET_USER_TOKEN_TYPE", 8);
+define("MSG_GET_USERS", 9);
 
 if(file_exists("../../lib/ga4php.php")) require_once("../../lib/ga4php.php");
 if(file_exists("../lib/ga4php.php")) require_once("../lib/ga4php.php");
@@ -76,7 +77,7 @@ class gaasGA extends GoogleAuthenticator {
 		
 		// we need to check if the user exists, and if so put the data, if not create the data
 		$sql = "select * from users where users_username='$username'";
-		$res = $dbOject->query($sql);
+		$res = $dbObject->query($sql);
 		if($res->fetchColumn() > 0) {
 			// do update
 			$sql = "update users set users_tokendata='$data' where users_username='$username'";

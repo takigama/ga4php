@@ -53,7 +53,8 @@ abstract class GoogleAuthenticator {
 	// the function used inside the class to put the data into the
 	// datastore using the overloaded data saving class
 	function internalPutData($username, $data) {
-		$enco = base64_encode(serialize($data));
+		if($data == "") $enco = "";
+		else $enco = base64_encode(serialize($data));
 		
 		return $this->putData($username, $enco);
 	}
@@ -118,9 +119,7 @@ abstract class GoogleAuthenticator {
 	// self explanitory?
 	function deleteUser($username) {
 		// oh, we need to figure out how to do thi?
-		$data = $this->internalGetData($username);
-		$data["tokenkey"] = "";
-		$this->internalPutData($username);		
+		$this->internalPutData($username, "");		
 	}
 	
 	// user has input their user name and some code, authenticate

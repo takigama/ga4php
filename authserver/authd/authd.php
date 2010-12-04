@@ -38,6 +38,7 @@ if($pid == -1) {
 		print_r($msg);
 		switch($msg_type) {
 			case MSG_AUTH_USER_TOKEN:
+				echo "Call to auth user token\n";
 				// minimal checking, we leav it up to authenticateUser to do the real
 				// checking
 				if(!isset($msg["user"])) $msg["user"] = "";
@@ -48,6 +49,7 @@ if($pid == -1) {
 				msg_send($cl_queue, MSG_AUTH_USER_TOKEN, $myga->authenticateUser($username, $passcode));
 				break;
 			case MSG_ADD_USER_TOKEN:
+				echo "Call to add user token\n";
 				if(!isset($msg["username"])) {
 					msg_send($cl_queue, MSG_ADD_USER_TOKEN, false);	
 				} else {
@@ -57,6 +59,7 @@ if($pid == -1) {
 				}
 				break;
 			case MSG_DELETE_USER:
+				echo "Call to del user\n";
 				if(!isset($msg["username"])) {
 					msg_send($cl_queue, MSG_DELETE_USER, false);	
 				} else {
@@ -64,8 +67,10 @@ if($pid == -1) {
 					global $myga;
 					msg_send($cl_queue, MSG_DELETE_USER, $myga->deleteUser($username));
 				}
+				break;
 			case MSG_AUTH_USER_PASSWORD:
 				// TODO
+				echo "Call to auth user pass\n";
 				if(!isset($msg["username"])) {
 					msg_send($cl_queue, MSG_AUTH_USER_PASSWORD, false);
 					break;
@@ -76,14 +81,29 @@ if($pid == -1) {
 				}
 				
 				$username = $msg["username"];
-				$sql = "select users_password from users where username='$username'";
+				$password = $msg["password"];
+				$sql = "select users_password from users where users_username='$username'";
 				$dbo = getDatabase();
-				
+				$res = $dbo->query($sql);
+				$pass = "";
+				foreach($res as $row) {
+					$pass = $row["users_password"];
+				}
 				
 				// TODO now do auth
+				$ourpass = hash('sha512', $password);
+				echo "ourpass: $ourpass\nourhash: $pass\n";
+				if($ourpass == $pass) {
+					msg_send($cl_queue, MSG_AUTH_USER_PASSWORD, true);
+					
+				} else {
+					msg_send($cl_queue, MSG_AUTH_USER_PASSWORD, false);
+					
+				}
 				
 				break;
 			case MSG_SET_USER_PASSWORD:
+				echo "Call to set user pass\n";
 				// TODO
 				if(!isset($msg["username"])) {
 					msg_send($cl_queue, MSG_SET_USER_PASSWORD, false);
@@ -94,10 +114,24 @@ if($pid == -1) {
 					break;
 				}
 				
+				$username = $msg["username"];
+				$password = $msg["password"];
+				
+				$pass = hash('sha512', $password);
+				
+				$dbo = getDatabase();
+				$sql = "update users set users_password='$pass' where users_username='$username'";
+				
+				$dbo->query($sql);
+
+				msg_send($cl_queue, MSG_SET_USER_REALNAME, true);
+				
+				
 				// these are irrelavent yet
 				// TODO now set pass
 				break;
 			case MSG_SET_USER_REALNAME:
+				echo "Call to set user realname\n";
 				// TODO
 				if(!isset($msg["username"])) {
 					msg_send($cl_queue, MSG_SET_USER_REALNAME, false);
@@ -110,7 +144,8 @@ if($pid == -1) {
 				
 				$username = $msg["username"];
 				$realname = $msg["realname"];
-				$sql = "update set users_realnemd='$realname' where username='$username'";
+				$sql = "update users set users_realname='$realname' where users_username='$username'";
+				echo "sql: $sql\n";
 				$dbo = getDatabase();
 				
 				$dbo->query($sql);
@@ -121,6 +156,7 @@ if($pid == -1) {
 				break;
 			case MSG_SET_USER_TOKEN:
 				// TODO
+				echo "Call to set user token\n";
 				if(!isset($msg["username"])) {
 					msg_send($cl_queue, MSG_SET_USER_TOKEN, false);
 					break;
@@ -137,6 +173,7 @@ if($pid == -1) {
 				break;			
 			case MSG_SET_USER_TOKEN_TYPE:
 				// TODO
+				echo "Call to set user token type\n";
 				if(!isset($msg["username"])) {
 					msg_send($cl_queue, MSG_SET_USER_TOKEN_TYPE, false);
 					break;
@@ -152,7 +189,36 @@ if($pid == -1) {
 				msg_send($cl_queue, MSG_SET_USER_TOKEN_TYPE, $myga->setTokenType($username, $tokentype));
 				
 				// TODO now set token 
-				break;			
+				break;
+			case MSG_GET_USERS:
+				// TODO this needs to be better
+				$sql = "select * from users";
+				
+				$dbo = getDatabase();
+				$res = $dbo->query($sql);
+				
+				$users = "";
+				$i = 0;
+				foreach($res as $row) {
+					$users[$i]["username"] = $row["users_username"];
+					$users[$i]["realname"] = $row["users_realname"];
+					if($row["users_password"]!="") {
+						$users[$i]["haspass"] = true;
+					} else {
+						$users[$i]["haspass"] = false;
+					}
+					echo "user: ".$users[$i]["username"]." has tdata: \"".$row["users_tokendata"]."\"\n";
+					if($row["users_tokendata"]!="") {
+						$users[$i]["hastoken"] = true;
+					} else {
+						$users[$i]["hastoken"] = false;
+					}
+					$i++; 
+				}
+				msg_send($cl_queue, GET_USERS, $users);
+				
+				// TODO now set token 
+				break;
 				
 		}		
 	}	
