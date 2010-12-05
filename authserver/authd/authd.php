@@ -41,21 +41,69 @@ if($pid == -1) {
 				echo "Call to auth user token\n";
 				// minimal checking, we leav it up to authenticateUser to do the real
 				// checking
-				if(!isset($msg["user"])) $msg["user"] = "";
+				if(!isset($msg["username"])) $msg["username"] = "";
 				if(!isset($msg["passcode"])) $msg["passcode"] = "";
-				$username = $msg["user"];
+				$username = $msg["username"];
 				$passcode = $msg["passcode"];
 				global $myga;
-				msg_send($cl_queue, MSG_AUTH_USER_TOKEN, $myga->authenticateUser($username, $passcode));
+				$authval = $myga->authenticateUser($username, $passcode);
+				msg_send($cl_queue, MSG_AUTH_USER_TOKEN, $authval);
+				break;
+				
+			case MSG_GET_OTK_PNG:
+				if(!isset($msg["username"])) {
+					msg_send($cl_queue, MSG_GET_OTK_PNG, false);
+				} else {
+					$username = $msg["username"];
+					$sql = "select users_otk from users where users_username='$username'";
+					$dbo = getDatabase();
+					$res = $dbo->query($sql);
+					$otk = "";
+					foreach($res as $row) {
+						$otk = $row["users_otk"];
+					}
+					
+					if($otk == "") {
+						msg_send($cl_queue, MSG_GET_OTK_PNG, false);
+					} else {
+						$hand = fopen("otks/$otk.png", "rb");
+						$data = fread($hand, filesize("otks/$otk.png"));
+						fclose($hand);
+						msg_send($cl_queue, MSG_GET_OTK_PNG, $data);
+						unlink("otks/$otk.png");
+						$sql = "update users set users_otk='' where users_username='$username'";
+						$dbo->query($sql);
+					}
+				}
+				
 				break;
 			case MSG_ADD_USER_TOKEN:
 				echo "Call to add user token\n";
 				if(!isset($msg["username"])) {
 					msg_send($cl_queue, MSG_ADD_USER_TOKEN, false);	
 				} else {
-					$username = $msg["username"];				
+					$username = $msg["username"];
+					$tokentype="HOTP";
+					if(isset($msg["tokentype"])) {
+						$tokentype="HOTP";
+					}
+					$hexkey = "";
+					if(isset($msg["hexkey"])) {
+						$hexkey = $msg["hexkey"];
+					}
 					global $myga;
-					msg_send($cl_queue, MSG_ADD_USER_TOKEN, $myga->setUser($username));
+					$myga->setUser($username, $tokentype, "", $hexkey);
+					
+					$url = $myga->createUrl($username);
+					mkdir("otks");
+					$otk = generateRandomString();
+					system("qrencode -o otks/$otk.png $url");
+					
+					$sql = "update users set users_otk='$otk' where users_username='$username'";
+					$dbo = getDatabase();
+					$res = $dbo->query($sql);
+					
+					msg_send($cl_queue, MSG_ADD_USER_TOKEN, true);
 				}
 				break;
 			case MSG_DELETE_USER:
@@ -65,7 +113,11 @@ if($pid == -1) {
 				} else {
 					$username = $msg["username"];				
 					global $myga;
-					msg_send($cl_queue, MSG_DELETE_USER, $myga->deleteUser($username));
+					$sql = "delete from users where users_username='$username'";
+					$dbo = getDatabase();
+					$dbo->query($sql);
+
+					msg_send($cl_queue, MSG_DELETE_USER, true);
 				}
 				break;
 			case MSG_AUTH_USER_PASSWORD:
@@ -145,7 +197,6 @@ if($pid == -1) {
 				$username = $msg["username"];
 				$realname = $msg["realname"];
 				$sql = "update users set users_realname='$realname' where users_username='$username'";
-				echo "sql: $sql\n";
 				$dbo = getDatabase();
 				
 				$dbo->query($sql);
@@ -167,7 +218,10 @@ if($pid == -1) {
 				}
 				
 				global $myga;
-				msg_send($cl_queue, MSG_SET_USER_TOKEN, $myga->setUserKey($username, $passcode));
+				$username = $msg["username"];
+				$token = $msg["tokenstring"];
+				$return = $myga->setUserKey($username, $token);
+				msg_send($cl_queue, MSG_SET_USER_TOKEN, $return);
 				
 				// TODO now set token 
 				break;			
