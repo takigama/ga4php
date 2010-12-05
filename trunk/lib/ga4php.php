@@ -112,7 +112,10 @@ abstract class GoogleAuthenticator {
 		// consider scrapping this
 		$token = $this->internalGetData($username);
 		$token["tokenkey"] = $key;
-		$this->internalPutData($username, $token);		
+		$this->internalPutData($username, $token);
+		
+		// TODO error checking
+		return true;
 	}
 	
 	

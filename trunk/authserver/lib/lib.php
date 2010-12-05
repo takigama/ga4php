@@ -13,9 +13,24 @@ define("MSG_SET_USER_REALNAME", 6);
 define("MSG_SET_USER_TOKEN", 7);
 define("MSG_SET_USER_TOKEN_TYPE", 8);
 define("MSG_GET_USERS", 9);
+define("MSG_GET_OTK_PNG", 10);
 
 if(file_exists("../../lib/ga4php.php")) require_once("../../lib/ga4php.php");
 if(file_exists("../lib/ga4php.php")) require_once("../lib/ga4php.php");
+
+
+function generateRandomString()
+{
+	$str = "";
+	$strpos = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+	
+	for($i=0; $i<128; $i++) {
+		$str .= $strpos[rand(0, strlen($strpos)-1)];
+	}
+	
+	return $str;
+}
+
 
 function getDatabase() {
 	$dbobject = false;
@@ -31,7 +46,7 @@ function getDatabase() {
 		} catch(PDOException $exep) {
 			error_log("execpt on db open");
 		}
-		$sql = 'CREATE TABLE "users" ("users_id" INTEGER PRIMARY KEY AUTOINCREMENT,"users_username" TEXT, "users_realname" TEXT, "users_password" TEXT, "users_tokendata" TEXT);';
+		$sql = 'CREATE TABLE "users" ("users_id" INTEGER PRIMARY KEY AUTOINCREMENT,"users_username" TEXT, "users_realname" TEXT, "users_password" TEXT, "users_tokendata" TEXT, "users_otk" TEXT);';
 		$dbobject->query($sql);
 	}
 	
@@ -44,6 +59,7 @@ function closeDatabase($db) {
 
 class gaasGA extends GoogleAuthenticator {
 	function getData($username) {
+		echo "called into getdata\n";
 		
 		// get our database connection
 		$dbObject = getDatabase();
@@ -55,14 +71,17 @@ class gaasGA extends GoogleAuthenticator {
 		$result = $dbObject->query($sql);
 		
 		// check the result
+		echo "next1\n";
 		if(!$result) return false;
 		
 		// now just retreieve all the data (there should only be one, but whatever)
+		echo "next2\n";
 		$tokendata = false;
 		foreach($result as $row) {
 			$tokendata = $row["users_tokendata"];
 		}
-		
+
+		echo "next3, $username, $tokendata\n";
 		// now we have our data, we just return it. If we got no data
 		// we'll just return false by default
 		return $tokendata;
@@ -83,7 +102,7 @@ class gaasGA extends GoogleAuthenticator {
 			$sql = "update users set users_tokendata='$data' where users_username='$username'";
 		} else {
 			// do insert
-			$sql = "insert into users values (NULL, '$username', '', '', '$data')";
+			$sql = "insert into users values (NULL, '$username', '', '', '$data', '')";
 		}
 		
 		if($dbObject->query($sql)) {

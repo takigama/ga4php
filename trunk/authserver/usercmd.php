@@ -35,40 +35,83 @@ if(!isset($argv[1])) {
 	echo "\tsettoken: settoken <username> <tokenkey> - sets the key (hex) for a token\n";
 	echo "\tsettype: settype <username> <tokentype> - sets a token type for a user\n";
 	echo "\tgetusers: getusers - gets a list of users\n";
+	echo "\tgetotk: getotk <username> - gets the OTK png for a key\n";
 	return 0;	
 }
 
 switch($argv[1]) {
-	case "auth":
-		if($myAC->authUser($argv[2], $argv[3])==1) {
-			echo "Pass!";
+	case "getotk":
+		$val = $myAC->getOtkPng($argv[2]);
+		if($val === false) {
+			echo "Failure\n";
 		} else {
-			echo "Fail!";
+			$hand = fopen("val.png", "w");
+			fwrite($hand, $val);
+			fclose($hand);
+			echo "In val.png\n";
+		}
+		break;
+	case "auth":
+		if($myAC->authUserToken($argv[2], $argv[3])==1) {
+			echo "Pass!\n";
+		} else {
+			echo "Fail!\n";
 		}
 		break;
 	case "add":
-		$myAC->addUser($argv[2]);
+		$return = $myAC->addUser($argv[2]);
+		echo "Created user, ".$argv[2]." returned $return\n";
 		break;
 	case "delete":
-		$myAC->deleteUser($argv[2]);
+		$res = $myAC->deleteUser($argv[2]);
+		if($res) {
+			echo "Deleted\n";
+		} else {
+			echo "Failure?\n";
+		}
 		break;
 	case "authpass":
-		$myAC->authUserPass($argv[2], $argv[3]);
+		$ret = $myAC->authUserPass($argv[2], $argv[3]);
+		if($ret) echo "Authenticated\n";
+		else echo "Failed\n";
 		break;
 	case "setpass":
-		$myAC->setUserPass($argv[2], $argv[3]);
+		$res = $myAC->setUserPass($argv[2], $argv[3]);
+		if($res) echo "Password Set\n";
+		else echo "Failure?\n";
 		break;
 	case "setname":
-		$myAC->setUserRealName($argv[2], $argv[3]);
+		$ret = $myAC->setUserRealName($argv[2], $argv[3]);
+		if($ret) echo "Real Name Set\n";
+		else echo "Failure?\n";
 		break;
 	case "settoken":
-		$myAC->setUserToken($argv[2], $argv[3]);
+		$ret = $myAC->setUserToken($argv[2], $argv[3]);
+		if($ret) echo "Token Set\n";
+		else echo "Failure?\n";
 		break;
 	case "settype":
-		$myAC->setUserTokenType($argv[2], $argv[3]);
+		$ret = $myAC->setUserTokenType($argv[2], $argv[3]);
+		if($ret) echo "Token Type Set\n";
+		else echo "Failure?\n";
 		break;
 	case "getusers":
-		$myAC->getUsers();
+		$users = $myAC->getUsers();
+		foreach($users as $user) {
+			if($user["realname"] != "") $realname = $user["realname"];
+			else $realname = "- Not Set -";
+			
+			if($user["haspass"]) $haspass = "Yes";
+			else $haspass = "No";
+			
+			if($user["hastoken"]) $hastoken = "Yes";
+			else $hastoken = "No";
+			
+			echo "Username: ".$user["username"]."\n";
+			echo "\tReal Name: ".$realname."\n";
+			echo "\tHas Password?: ".$haspass."\n";
+			echo "\tHas Token?: ".$hastoken."\n\n";
+		}
 		break;
 }
 ?>
