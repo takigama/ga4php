@@ -147,7 +147,7 @@ abstract class GoogleAuthenticator {
 		switch($ttype) {
 			case "HOTP":
 				error_log("in hotp");
-				$st = $tlid;
+				$st = $tlid+1;
 				$en = $tlid+$this->hotpSkew;
 				for($i=$st; $i<$en; $i++) {
 					$stest = $this->oath_hotp($tkey, $i);
