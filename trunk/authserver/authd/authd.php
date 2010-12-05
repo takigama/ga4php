@@ -1,5 +1,7 @@
 <?php
 
+// TODO: SO MUCH ERROR CHECKING ITS NOT FUNNY
+
 if(file_exists("config.php")) {
 	require_once("config.php");
 } else {
@@ -31,11 +33,8 @@ if($pid == -1) {
 	global $myga;
 	
 	
-	print_r($myga);
-	
 	while(true) {
 		msg_receive($sr_queue, 0, $msg_type, 16384, $msg);
-		print_r($msg);
 		switch($msg_type) {
 			case MSG_AUTH_USER_TOKEN:
 				echo "Call to auth user token\n";
@@ -69,10 +68,10 @@ if($pid == -1) {
 						$hand = fopen("otks/$otk.png", "rb");
 						$data = fread($hand, filesize("otks/$otk.png"));
 						fclose($hand);
-						msg_send($cl_queue, MSG_GET_OTK_PNG, $data);
 						unlink("otks/$otk.png");
 						$sql = "update users set users_otk='' where users_username='$username'";
 						$dbo->query($sql);
+						msg_send($cl_queue, MSG_GET_OTK_PNG, $data);
 					}
 				}
 				
@@ -155,23 +154,29 @@ if($pid == -1) {
 				
 				break;
 			case MSG_SET_USER_PASSWORD:
-				echo "Call to set user pass\n";
+				echo "how on earth is that happening Call to set user pass, wtf?\n";
 				// TODO
+				print_r($msg);
 				if(!isset($msg["username"])) {
 					msg_send($cl_queue, MSG_SET_USER_PASSWORD, false);
+					echo "in break 1\n";
 					break;
 				}
 				if(!isset($msg["password"])) {
 					msg_send($cl_queue, MSG_SET_USER_PASSWORD, false);
+					echo "in break 1\n";
 					break;
 				}
 				
 				$username = $msg["username"];
 				$password = $msg["password"];
 				
-				$pass = hash('sha512', $password);
+				echo "would set pass for $username, to $password\n";
+				if($password == "") $pass = "";
+				else $pass = hash('sha512', $password);
 				
 				$dbo = getDatabase();
+				echo "in set user pass for $username, $pass\n";
 				$sql = "update users set users_password='$pass' where users_username='$username'";
 				
 				$dbo->query($sql);
@@ -266,6 +271,12 @@ if($pid == -1) {
 						$users[$i]["hastoken"] = true;
 					} else {
 						$users[$i]["hastoken"] = false;
+					}
+					
+					if($row["users_otk"]!="") {
+						$users[$i]["otk"] = $row["users_otk"];
+					} else {
+						$users[$i]["otk"] = "";
 					}
 					$i++; 
 				}
