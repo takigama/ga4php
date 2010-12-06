@@ -73,7 +73,10 @@ If you are ready to proceed, click <a href="index.php?gettoken&username=<?php ec
 <h1>Welcome to the GAAS User Site</h1>
 <?php
 if(isset($_REQUEST["message"])) {
-	echo "<font color=\"red\"><i>Login Failure</i></font>";
+	echo "<font color=\"green\">".$_REQUEST["message"]."</font>";
+} 
+if(isset($_REQUEST["error"])) {
+	echo "<font color=\"red\">".$_REQUEST["error"]."</font>";
 } 
 
 if(!$loggedin) {
