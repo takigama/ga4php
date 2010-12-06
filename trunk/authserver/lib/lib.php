@@ -15,10 +15,10 @@ define("MSG_SET_USER_TOKEN_TYPE", 8);
 define("MSG_GET_USERS", 9);
 define("MSG_GET_OTK_PNG", 10);
 define("MSG_GET_OTK_ID", 11);
+define("MSG_DELETE_USER_TOKEN", 12);
 
-if(file_exists("../../lib/ga4php.php")) require_once("../../lib/ga4php.php");
-if(file_exists("../lib/ga4php.php")) require_once("../lib/ga4php.php");
-
+// messy
+require_once(dirname(__FILE__)."/../../lib/ga4php.php");
 
 function generateRandomString()
 {
@@ -100,9 +100,11 @@ class gaasGA extends GoogleAuthenticator {
 		$res = $dbObject->query($sql);
 		if($res->fetchColumn() > 0) {
 			// do update
+			error_log("doing userdata update");
 			$sql = "update users set users_tokendata='$data' where users_username='$username'";
 		} else {
 			// do insert
+			error_log("doing user data create");
 			$sql = "insert into users values (NULL, '$username', '', '', '$data', '')";
 		}
 		

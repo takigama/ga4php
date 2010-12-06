@@ -43,9 +43,11 @@ if(!isset($argv[1])) {
 switch($argv[1]) {
 	case "radauth":
 		if($myAC->authUserToken($argv[2], $argv[3])==1) {
-			return 0;
+			syslog(LOG_WARNING, "Got good request for user, ".$argv[2]);
+			exit(0);
 		} else {
-			return 255;
+			syslog(LOG_WARNING, "Got bad request for user, ".$argv[2]);
+			exit(255);
 		}
 		break;
 	case "getotk":
