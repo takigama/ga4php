@@ -14,6 +14,7 @@ define("MSG_SET_USER_TOKEN", 7);
 define("MSG_SET_USER_TOKEN_TYPE", 8);
 define("MSG_GET_USERS", 9);
 define("MSG_GET_OTK_PNG", 10);
+define("MSG_GET_OTK_ID", 11);
 
 if(file_exists("../../lib/ga4php.php")) require_once("../../lib/ga4php.php");
 if(file_exists("../lib/ga4php.php")) require_once("../lib/ga4php.php");

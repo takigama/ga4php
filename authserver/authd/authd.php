@@ -48,29 +48,51 @@ if($pid == -1) {
 				$authval = $myga->authenticateUser($username, $passcode);
 				msg_send($cl_queue, MSG_AUTH_USER_TOKEN, $authval);
 				break;
-				
-			case MSG_GET_OTK_PNG:
+			case MSG_GET_OTK_ID:
 				if(!isset($msg["username"])) {
-					msg_send($cl_queue, MSG_GET_OTK_PNG, false);
+					msg_send($cl_queue, MSG_GET_OTK_ID, false);
 				} else {
 					$username = $msg["username"];
 					$sql = "select users_otk from users where users_username='$username'";
 					$dbo = getDatabase();
 					$res = $dbo->query($sql);
-					$otk = "";
+					$otkid = "";
 					foreach($res as $row) {
-						$otk = $row["users_otk"];
+						$otkid = $row["users_otk"];
 					}
 					
-					if($otk == "") {
+					if($otkid == "") {
+						msg_send($cl_queue, MSG_GET_OTK_ID, false);
+					} else {
+						msg_send($cl_queue, MSG_GET_OTK_ID, $otkid);
+					}
+				}
+				break;
+			case MSG_GET_OTK_PNG:
+				if(!isset($msg["otk"])) {
+					msg_send($cl_queue, MSG_GET_OTK_PNG, false);
+				} else {
+					$otk = $msg["otk"];
+					$sql = "select users_username from users where users_otk='$otk'";
+					$dbo = getDatabase();
+					$res = $dbo->query($sql);
+					$username = "";
+					foreach($res as $row) {
+						$username = $row["users_username"];
+					}
+					
+					if($username == "") {
+						msg_send($cl_queue, MSG_GET_OTK_PNG, false);
+					} else if($username != $msg["username"]) {
 						msg_send($cl_queue, MSG_GET_OTK_PNG, false);
 					} else {
 						$hand = fopen("otks/$otk.png", "rb");
 						$data = fread($hand, filesize("otks/$otk.png"));
 						fclose($hand);
-						unlink("otks/$otk.png");
-						$sql = "update users set users_otk='' where users_username='$username'";
-						$dbo->query($sql);
+						//unlink("otks/$otk.png");
+						//$sql = "update users set users_otk='' where users_username='$username'";
+						//$dbo->query($sql);
+						error_log("senting otk, fsize: ".filesize("otks/$otk.png")." $otk ");
 						msg_send($cl_queue, MSG_GET_OTK_PNG, $data);
 					}
 				}

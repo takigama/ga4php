@@ -11,7 +11,7 @@
  * then user admin would be less disconnected. I.e. if a user was deleted from AD, their token
  * data should disappear with them.
  */
-require_once("actions.php");
+require_once("admin_actions.php");
 
 // the logged in component
 if($loggedin) {
@@ -20,7 +20,7 @@ if($loggedin) {
 Welcome to the Google Authenticator Authentication Server Manager Application<br>
 <hr><h2>Users</h2>
 <table border="1">
-<tr><th>Username</th><th>RealName</th><th>Has Password?</th><th>Has Token?</th><th>OTK</th><th>Update</th><th>Delete</th></tr>
+<tr><th>Username</th><th>RealName</th><th>Has Password?</th><th>Has Token?</th><th>One Time Key</th><th>Update</th><th>Delete</th></tr>
 <?php
 $users = $myAC->getUsers();
 foreach($users as $user) {
@@ -29,13 +29,13 @@ foreach($users as $user) {
 	if($user["realname"] == "") $realname = "";
 	else $realname = $user["realname"];
 	
-	if($user["haspass"]) $haspass = "Yes <input type=\"password\" name=\"password\"> <a href=\"index.php?action=deletepass&username=$username\">Delete Password</a>";
+	if($user["haspass"]) $haspass = "Yes <input type=\"password\" name=\"password\"> <a href=\"?action=deletepass&username=$username\">Delete Password</a>";
 	else $haspass = "No <input type=\"password\" name=\"password\">";
 	
 	if($user["hastoken"]) $hastoken = "Yes";
 	else $hastoken = "No";
 	
-	if($user["otk"]!="") $otk = "<a href=\"index.php?action=getotk&username=$username\">Get</a>";
+	if($user["otk"]!="") $otk = "<a href=\"?action=getotk&username=$username&otk=".$user["otk"]."\">Get</a>";
 	else $otk = "Already Claimed";
 	
 	$delete = "<a href=\"?action=delete&username=$username\">Delete</a>";
@@ -45,8 +45,17 @@ foreach($users as $user) {
 } 
 ?>
 </table><br>
-<form method="post" action="?action=createuser">Create User: <input type="text" name="username"> <input type="submit" value="Create"></form>
+<form method="post" action="?action=createuser">Create User(s) - Enter a comma seperated list of names: <input type="text" name="username" size="120"> <input type="submit" value="Create"></form>
 
+<?php
+if(isset($_REQUEST["action"])) if($_REQUEST["action"] == "getotk") {
+	$username = $_REQUEST["username"];
+	$otk = $_REQUEST["otk"];
+	echo "<hr>Got One Time Key for user $username, this one-time-key can only be retrieved once, after that it is deleted<br>";
+	echo "<img src=\"?action=getotkimg&username=$username&otk=$otk\" alt=\"one time key error\"><br>";
+} 
+
+?>
 <hr><h2>Radius Clients</h2>
 Not yet implemented
 

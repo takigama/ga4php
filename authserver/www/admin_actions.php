@@ -17,9 +17,9 @@ if(isset($_REQUEST["action"])) {
 			if($myAC->authUserPass($username, $password)) {
 				$_SESSION["loggedin"] = true;
 				$_SESSION["username"] = $username;
-				header("Location: index.php");
+				header("Location: admin.php");
 			} else {
-				header("Location: index.php?message=loginfail");
+				header("Location: admin.php?message=loginfail");
 			}
 			
 			exit(0);
@@ -27,13 +27,18 @@ if(isset($_REQUEST["action"])) {
 		case "logout":
 			$_SESSION["loggedin"] = false;
 			$_SESSION["username"] = "";
-			header("Location: index.php");
+			header("Location: admin.php");
 			exit(0);
 			break;
 		case "createuser":
 			$username = $_REQUEST["username"];
-			$myAC->addUser($username);
-			header("Location: index.php");
+			$users = explode(",",$username);
+			foreach($users as $user) {
+				$user = trim($user);
+				error_log("createing, $user\n");
+				if($user != "" && strlen($user)>2) $myAC->addUser($user);
+			}
+			header("Location: admin.php");
 			exit(0);
 			break;
 		case "update":
@@ -56,11 +61,13 @@ if(isset($_REQUEST["action"])) {
 			$username = $_REQUEST["username"];
 			$myAC->setUserPass($username, "");
 			break;
-		case "getotk":
+		case "getotkimg":
+			$otk = $_REQUEST["otk"];
 			$username = $_REQUEST["username"];
-			$otk = $myAC->getOtkPng($username);
+			error_log("requesting otk, $otk");
+			$otk_img = $myAC->getOtkPng($username,$otk);
 			header("Content-type: image/png");
-			echo $otk;
+			echo $otk_img;
 			exit(0);
 			break;
 	}
