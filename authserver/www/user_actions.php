@@ -8,10 +8,8 @@ $loggedin = false;
 session_start();
 
 if(isset($_SESSION["loggedin"])) if($_SESSION["loggedin"]) {
-	error_log("session exists, poof!");
 	$loggedin = true;
 } else {
-	error_log("no session");
 	$loggedin = false;
 }
 
