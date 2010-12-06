@@ -16,6 +16,15 @@ if(isset($_SESSION["user_loggedin"])) if($_SESSION["user_loggedin"]) {
 if(isset($_REQUEST["action"])) {
 	error_log("action set: ".$_REQUEST["action"]);
 	switch($_REQUEST["action"]) {
+		case "actuallygettoken":
+			$otkid = $_REQUEST["otkid"];
+			$username = $_REQUEST["username"];
+			error_log("requesting otk, $otk");
+			$otk_img = $myAC->getOtkPng($username,$otkid);
+			header("Content-type: image/png");
+			echo $otk_img;
+			exit(0);
+			break;
 		case "login":
 			error_log("being login");
 			$username = $_REQUEST["username"];
@@ -34,7 +43,7 @@ if(isset($_REQUEST["action"])) {
 		case "logout":
 			$_SESSION["user_loggedin"] = false;
 			$_SESSION["username"] = "";
-			header("Location: admin.php");
+			header("Location: index.php?message=".urlencode("logged out"));
 			exit(0);
 			break;
 			
