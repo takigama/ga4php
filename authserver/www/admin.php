@@ -36,6 +36,8 @@ On this page, you create users and manage their tokens and passwords. A few note
 and edit anyone, including you
 <li> OTK/One-Time-Keys are the QRcode for provisioning a GA token, it can only be viewed once
 and once viewed is deleted. If you need a new one, you need to delete the user and re-create.
+<li> TOTP tokens are time based tokens that change every 30 seconds, HOTP tokens are event tokens
+that change everytime they are used or generated
 	<?php 
 } 
 
@@ -81,11 +83,15 @@ foreach($users as $user) {
 	if($user["haspass"]) $haspass = "Yes <a href=\"?action=deletepass&username=$username\">Delete Password</a>";
 	else $haspass = "No";
 	
-	if($user["hastoken"]) $hastoken = "Yes <a href=\"?action=recreatehotptoken&username=$username\">Re-Create (hotp)</a> <a href=\"?action=recreatetotptoken&username=$username\">Re-Create (totp)</a> <a href=\"?action=deletetoken&username=$username\">Delete</a>";
-	else $hastoken = "No <a href=\"?action=recreatehotptoken&username=$username\">Create (hotp)</a> <a href=\"?action=recreatetotptoken&username=$username\">Create (totp)</a>";
-	
-	if($user["otk"]!="") $otk = "<a href=\"?action=getotk&username=$username&otk=".$user["otk"]."\">Get</a>";
+	if($user["otk"]=="deleted") $otk = "OTK Was Not Picked Up";
+	else if($user["otk"]!="") $otk = "<a href=\"?action=getotk&username=$username&otk=".$user["otk"]."\">Get</a>";
 	else $otk = "Already Claimed";
+	
+	if($user["hastoken"]) $hastoken = "Yes <a href=\"?action=recreatehotptoken&username=$username\">Re-Create (HOTP)</a> <a href=\"?action=recreatetotptoken&username=$username\">Re-Create (TOTP)</a> <a href=\"?action=deletetoken&username=$username\">Delete</a>";
+	else {
+		$hastoken = "No <a href=\"?action=recreatehotptoken&username=$username\">Create (HOTP)</a> <a href=\"?action=recreatetotptoken&username=$username\">Create (TOTP)</a>";
+		if($user["otk"]!="deleted")$otk = "No Token Exists";
+	}
 	
 	$delete = "<a href=\"?action=delete&username=$username\">Delete</a>";
 	
