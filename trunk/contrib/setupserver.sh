@@ -52,7 +52,7 @@ fi
 
 # first install apt packages for apache and php
 echo "Beginning install of apt-get packages"
-apt-get install -y apache2 libapache2-mod-php5 php-soap php5-ldap php5-cli php5-adodb subversion > /dev/null 2>&1
+apt-get install -y apache2 libapache2-mod-php5 php-soap php5-ldap php5-cli php5-adodb subversion qrencode > /dev/null 2>&1
 
 if [ "$?" != "0" ]
 then
@@ -66,19 +66,24 @@ echo "Apt-get packages installed, getting auth server code"
 MYTMPDIR="/tmp/ga$RANDOM"
 mkdir -p $MYTMPDIR
 cd $MYTMPDIR
-svn checkout http://ga4php.googlecode.com/svn/trunk/authserver authserver > /dev/null 2>&1
+svn checkout http://ga4php.googlecode.com/svn/trunk/ ga4php > /dev/null 2>&1
 if [ "$?" != "0" ]
 then
 	echo "There was a problem downloading the authserver source code.. bailing"
 	exit 2
 fi
 
-svn checkout http://ga4php.googlecode.com/svn/trunk/contrib contrib > /dev/null 2>&1
-if [ "$?" != "0" ]
-then
-	echo "There was a problem downloading the contrib source code.. bailing"
-	exit 2
-fi
+echo "Code downloaded, beginning installation into /opt/gaas"
 
-echo "Code downloaded, beginning installation"
+mkdir /opt/gaas
+cp -r * /opt/gaas
 
+echo "Createing service user"
+useradd -d /opt/gaas -r gaas -m
+
+chown -R gaas:gaas /opt/gaas
+echo "Tightening up permissions"
+chmod 700 /opt/gaas/authserver/authd
+chmod 770 /opt/gaas/authserver/
+
+echo "Users who wish to use the gaas system must now be added to the gaas group"
