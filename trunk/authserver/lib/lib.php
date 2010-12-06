@@ -17,6 +17,10 @@ define("MSG_GET_OTK_PNG", 10);
 define("MSG_GET_OTK_ID", 11);
 define("MSG_DELETE_USER_TOKEN", 12);
 
+// BASE_DIR = 
+$BASE_DIR = realpath(dirname(__FILE__)."/../../");
+global $BASE_DIR;
+
 // messy
 require_once(dirname(__FILE__)."/../../lib/ga4php.php");
 
@@ -35,15 +39,16 @@ function generateRandomString()
 
 function getDatabase() {
 	$dbobject = false;
-	if(file_exists("gaasdata.sqlite")) {
+	global $BASE_DIR;
+	if(file_exists("$BASE_DIR/authserver/authd/gaasdata.sqlite")) {
 		try {
-			$dbobject = new PDO("sqlite:gaasdata.sqlite");
+			$dbobject = new PDO("sqlite:$BASE_DIR/authserver/authd/gaasdata.sqlite");
 		} catch(PDOException $exep) {
 			error_log("execpt on db open");
 		}
 	} else {
 		try {
-			$dbobject = new PDO("sqlite:gaasdata.sqlite");
+			$dbobject = new PDO("sqlite:$BASE_DIR/authserver/authd/gaasdata.sqlite");
 		} catch(PDOException $exep) {
 			error_log("execpt on db open");
 		}

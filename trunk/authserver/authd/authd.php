@@ -2,11 +2,6 @@
 
 // TODO: SO MUCH ERROR CHECKING ITS NOT FUNNY
 
-if(file_exists("config.php")) {
-	require_once("config.php");
-} else {
-	// config file doesnt exist, we must abort sensibly
-}
 
 // get out master library for ga4php
 require_once("../lib/lib.php");
@@ -47,7 +42,8 @@ if($pid == -1) {
 					$otkid = $row["users_otk"];
 				}
 				if($otkid!="") {
-					unlink("otks/$otkid.png");
+					global $BASE_DIR;
+					unlink("$BASE_DIR/authserver/authd/otks/$otkid.png");
 				}
 				
 				$sql = "update users set users_tokendata='',users_otk='' where users_username='$username'";
@@ -106,13 +102,14 @@ if($pid == -1) {
 					} else if($username != $msg["username"]) {
 						msg_send($cl_queue, MSG_GET_OTK_PNG, false);
 					} else {
-						$hand = fopen("otks/$otk.png", "rb");
-						$data = fread($hand, filesize("otks/$otk.png"));
+						global $BASE_DIR;
+						$hand = fopen("$BASE_DIR/authserver/authd/otks/$otk.png", "rb");
+						$data = fread($hand, filesize("$BASE_DIR/authserver/authd/otks/$otk.png"));
 						fclose($hand);
-						unlink("otks/$otk.png");
+						unlink("$BASE_DIR/authserver/authd/otks/$otk.png");
 						$sql = "update users set users_otk='' where users_username='$username'";
 						$dbo->query($sql);
-						error_log("senting otk, fsize: ".filesize("otks/$otk.png")." $otk ");
+						error_log("senting otk, fsize: ".filesize("$BASE_DIR/authserver/authd/otks/$otk.png")." $otk ");
 						msg_send($cl_queue, MSG_GET_OTK_PNG, $data);
 					}
 				}
@@ -123,8 +120,9 @@ if($pid == -1) {
 				if(!isset($msg["username"])) {
 					msg_send($cl_queue, MSG_ADD_USER_TOKEN, false);	
 				} else {
+					global $BASE_DIR;
 					$username = $msg["username"];
-					$tokentype="HOTP";
+					$tokentype="TOTP";
 					if(isset($msg["tokentype"])) {
 						$tokentype=$msg["tokentype"];
 					}
@@ -136,9 +134,9 @@ if($pid == -1) {
 					$myga->setUser($username, $tokentype, "", $hexkey);
 					
 					$url = $myga->createUrl($username);
-					mkdir("otks");
+					if(!file_exists("$BASE_DIR/authserver/authd/otks")) mkdir("$BASE_DIR/authserver/authd/otks");
 					$otk = generateRandomString();
-					system("qrencode -o otks/$otk.png $url");
+					system("qrencode -o $BASE_DIR/authserver/authd/otks/$otk.png $url");
 					
 					$sql = "update users set users_otk='$otk' where users_username='$username'";
 					$dbo = getDatabase();
