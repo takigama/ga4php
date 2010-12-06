@@ -10,6 +10,34 @@ else $loggedin = false;
 
 if(isset($_REQUEST["action"])) {
 	switch($_REQUEST["action"]) {
+		case "recreatehotptoken":
+			$username = $_REQUEST["username"];
+			$myAC->addUser($username, "HOTP");
+			header("Location: ?message=".urlencode("seemed to work?"));
+			break;
+		case "recreatetotptoken":
+			$username = $_REQUEST["username"];
+			$myAC->addUser($username, "TOTP");
+			header("Location: ?message=".urlencode("seemed to work?"));
+			break;
+		case "deletetoken":
+			$username = $_REQUEST["username"];
+			$myAC->deleteUserToken($username);
+			header("Location: ?message=".urlencode("seemed to work?"));
+			break;
+		case "edituser":
+			$username = $_REQUEST["username"];
+			if($_REQUEST["original_real"] != $_REQUEST["realname"]) {
+				$myAC->setUserRealName($username, $_REQUEST["realname"]);
+			}
+			if($_REQUEST["password"] != "") {
+				if($_REQUEST["password"]!=$_REQUEST["password_conf"]) {
+					header("Location: ?message=confirmfalse");
+				} else {
+					$myAC->setUserPass($username, $_REQUEST["password"]);
+				}
+			}
+			break;
 		case "login":
 			$username = $_REQUEST["username"];
 			$password = $_REQUEST["password"];
@@ -19,7 +47,7 @@ if(isset($_REQUEST["action"])) {
 				$_SESSION["username"] = $username;
 				header("Location: admin.php");
 			} else {
-				header("Location: admin.php?message=loginfail");
+				header("Location: admin.php?error=".urlencode("Login Failed"));
 			}
 			
 			exit(0);

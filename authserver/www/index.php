@@ -26,6 +26,8 @@ Token Code: <input type="text" name="tokencode"><br>
 Hi user
 </html>
 
+<hr><a href="?action=logout">Logout</a>
+
 <?php 
 }
 ?>

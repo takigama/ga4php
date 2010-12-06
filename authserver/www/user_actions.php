@@ -7,7 +7,7 @@ $myAC = new GAAuthClient();
 $loggedin = false;
 session_start();
 
-if(isset($_SESSION["loggedin"])) if($_SESSION["loggedin"]) {
+if(isset($_SESSION["user_loggedin"])) if($_SESSION["user_loggedin"]) {
 	$loggedin = true;
 } else {
 	$loggedin = false;
@@ -23,7 +23,7 @@ if(isset($_REQUEST["action"])) {
 			
 			if($myAC->authUserToken($username, $token)) {
 				
-				$_SESSION["loggedin"] = true;
+				$_SESSION["user_loggedin"] = true;
 				$_SESSION["username"] = $username;
 				header("Location: index.php");
 			} else {
@@ -31,6 +31,13 @@ if(isset($_REQUEST["action"])) {
 				header("Location: index.php?message=loginfail");
 			}
 			break;
+		case "logout":
+			$_SESSION["user_loggedin"] = false;
+			$_SESSION["username"] = "";
+			header("Location: admin.php");
+			exit(0);
+			break;
+			
 	}
 }
 ?>

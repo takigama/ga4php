@@ -36,6 +36,26 @@ if($pid == -1) {
 	while(true) {
 		msg_receive($sr_queue, 0, $msg_type, 16384, $msg);
 		switch($msg_type) {
+			case MSG_DELETE_USER_TOKEN:
+				$username = $msg["username"];
+				
+				$sql = "select users_otk from users where users_username='$username'";
+				$dbo = getDatabase();
+				$res = $dbo->query($sql);
+				$otkid = "";
+				foreach($res as $row) {
+					$otkid = $row["users_otk"];
+				}
+				if($otkid!="") {
+					unlink("otks/$otkid.png");
+				}
+				
+				$sql = "update users set users_tokendata='',users_otk='' where users_username='$username'";
+				$dbo = getDatabase();
+				$res = $dbo->query($sql);
+				
+				msg_send($cl_queue, MSG_DELETE_USER_TOKEN, true);
+				break;
 			case MSG_AUTH_USER_TOKEN:
 				echo "Call to auth user token\n";
 				// minimal checking, we leav it up to authenticateUser to do the real
@@ -89,9 +109,9 @@ if($pid == -1) {
 						$hand = fopen("otks/$otk.png", "rb");
 						$data = fread($hand, filesize("otks/$otk.png"));
 						fclose($hand);
-						//unlink("otks/$otk.png");
-						//$sql = "update users set users_otk='' where users_username='$username'";
-						//$dbo->query($sql);
+						unlink("otks/$otk.png");
+						$sql = "update users set users_otk='' where users_username='$username'";
+						$dbo->query($sql);
 						error_log("senting otk, fsize: ".filesize("otks/$otk.png")." $otk ");
 						msg_send($cl_queue, MSG_GET_OTK_PNG, $data);
 					}
@@ -106,7 +126,7 @@ if($pid == -1) {
 					$username = $msg["username"];
 					$tokentype="HOTP";
 					if(isset($msg["tokentype"])) {
-						$tokentype="HOTP";
+						$tokentype=$msg["tokentype"];
 					}
 					$hexkey = "";
 					if(isset($msg["hexkey"])) {
@@ -134,6 +154,19 @@ if($pid == -1) {
 				} else {
 					$username = $msg["username"];				
 					global $myga;
+
+					$sql = "select users_otk from users where users_username='$username'";
+					$dbo = getDatabase();
+					$res = $dbo->query($sql);
+					$otkid = "";
+					foreach($res as $row) {
+						$otkid = $row["users_otk"];
+					}
+					if($otkid!="") {
+						unlink("otks/$otkid.png");
+					}
+					
+
 					$sql = "delete from users where users_username='$username'";
 					$dbo = getDatabase();
 					$dbo->query($sql);

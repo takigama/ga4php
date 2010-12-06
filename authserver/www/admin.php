@@ -17,10 +17,59 @@ require_once("admin_actions.php");
 if($loggedin) {
 ?>
 <h1>GAAS Manager</h1>
-Welcome to the Google Authenticator Authentication Server Manager Application<br>
+Welcome to the Google Authenticator Authentication Server Manager Application - <a href="?showhelp">Show Help</a><br>
+
+<?php 
+if(isset($_REQUEST["message"])) {
+	echo "<font color=\"green\">".$_REQUEST["message"]."</font>";
+} 
+if(isset($_REQUEST["error"])) {
+	echo "<font color=\"red\">".$_REQUEST["error"]."</font>";
+} 
+
+
+if(isset($_REQUEST["showhelp"])) {
+	echo "<hr>";
+	?>
+On this page, you create users and manage their tokens and passwords. A few notes,<br>
+<li> Passwords are *ONLY* for this page, if you assign a password to a user they can login here
+and edit anyone, including you
+<li> OTK/One-Time-Keys are the QRcode for provisioning a GA token, it can only be viewed once
+and once viewed is deleted. If you need a new one, you need to delete the user and re-create.
+	<?php 
+} 
+
+if(isset($_REQUEST["edituser"])) {
+	$username = $_REQUEST["edituser"];
+?>
+
+<h2>Editing user, <?php echo $username ?></h2><br>
+<form method="post" action="?action=edituser&username=<?php echo $username ?>">
+<input type="hidden" name="original_real" value="<?php echo $_REQUEST["realname"] ?>">
+<table>
+<tr><td>Real Name:</td><td><input type="text" name="realname" value="<?php echo $_REQUEST["realname"] ?>"></td></tr>
+<tr><td>Password:</td><td><input type="password" name="password"></td></tr>
+<tr><td>Confirm Password:</td><td><input type="password" name="password_conf"></td></tr>
+</table>
+<input type="submit" value="Update">
+</form>
+<form method="post" action="?action=customtoken&username=<?php echo $username ?>">
+<h3>Custom Tokens - doesnt work yet</h3><br>
+For assiging in a user-created or hardware tokens<br>
+Token Key (hex) <input type="text" name="tokenkey"><br>
+Token Type 
+<select name="tokentype">
+<option value="HOTP">HOTP</option>
+<option value="TOTP">TOTP</option>
+</select><br>
+<input type="submit" value="Set">
+</form>
+<?php
+} else {
+?>
 <hr><h2>Users</h2>
 <table border="1">
-<tr><th>Username</th><th>RealName</th><th>Has Password?</th><th>Has Token?</th><th>One Time Key</th><th>Update</th><th>Delete</th></tr>
+<tr><th>Username</th><th>RealName</th><th>Has Password?</th><th>Has Token?</th><th>One Time Key</th><th>Delete</th></tr>
 <?php
 $users = $myAC->getUsers();
 foreach($users as $user) {
@@ -29,25 +78,28 @@ foreach($users as $user) {
 	if($user["realname"] == "") $realname = "";
 	else $realname = $user["realname"];
 	
-	if($user["haspass"]) $haspass = "Yes <input type=\"password\" name=\"password\"> <a href=\"?action=deletepass&username=$username\">Delete Password</a>";
-	else $haspass = "No <input type=\"password\" name=\"password\">";
+	if($user["haspass"]) $haspass = "Yes <a href=\"?action=deletepass&username=$username\">Delete Password</a>";
+	else $haspass = "No";
 	
-	if($user["hastoken"]) $hastoken = "Yes";
-	else $hastoken = "No";
+	if($user["hastoken"]) $hastoken = "Yes <a href=\"?action=recreatehotptoken&username=$username\">Re-Create (hotp)</a> <a href=\"?action=recreatetotptoken&username=$username\">Re-Create (totp)</a> <a href=\"?action=deletetoken&username=$username\">Delete</a>";
+	else $hastoken = "No <a href=\"?action=recreatehotptoken&username=$username\">Create (hotp)</a> <a href=\"?action=recreatetotptoken&username=$username\">Create (totp)</a>";
 	
 	if($user["otk"]!="") $otk = "<a href=\"?action=getotk&username=$username&otk=".$user["otk"]."\">Get</a>";
 	else $otk = "Already Claimed";
 	
 	$delete = "<a href=\"?action=delete&username=$username\">Delete</a>";
 	
-	echo "<form method=\"post\" action=\"?action=update&username=$username\"><tr><td>$username</td><td><input type=\"text\" name=\"realname\" value=\"$realname\"></td><td>$haspass</td>";
-	echo "<td>$hastoken</td><td>$otk</td><td><input type=\"submit\" value=\"Update\"></td><td>$delete</td><tr></form>";
-} 
+	echo "<tr>";
+	echo "<td><a href=\"?edituser=$username&realname=$realname\">$username</a></td><td>$realname</td><td>$haspass</td>";
+	echo "<td>$hastoken</td><td>$otk</td><td>$delete</td><tr></form>";
+}
 ?>
 </table><br>
 <form method="post" action="?action=createuser">Create User(s) - Enter a comma seperated list of names: <input type="text" name="username" size="120"> <input type="submit" value="Create"></form>
 
 <?php
+
+
 if(isset($_REQUEST["action"])) if($_REQUEST["action"] == "getotk") {
 	$username = $_REQUEST["username"];
 	$otk = $_REQUEST["otk"];
@@ -59,10 +111,10 @@ if(isset($_REQUEST["action"])) if($_REQUEST["action"] == "getotk") {
 <hr><h2>Radius Clients</h2>
 Not yet implemented
 
-<hr><a href="?action=logout">Logout</a>
+<hr><a href="?action=logout">Logout</a> <a href="admin.php">Home</a>
 
 <?php 
-
+} // edit users
 
 } else {
 	
@@ -80,7 +132,10 @@ Not yet implemented
 <h1>GAAS Manager Login</h1>
 <?php
 if(isset($_REQUEST["message"])) {
-	echo "<font color=\"red\">Login Failed</font>";
+	echo "<font color=\"green\">".$_REQUEST["message"]."</font>";
+} 
+if(isset($_REQUEST["error"])) {
+	echo "<font color=\"red\">".$_REQUEST["error"]."</font>";
 } 
 ?>
 <form method="post" action="?action=login">
@@ -91,5 +146,5 @@ if(isset($_REQUEST["message"])) {
 </table>
 </form>
 <?php
-}
+} //loggedin
 ?>
