@@ -35,20 +35,25 @@ if(!isset($argv[1])) {
 	echo "\tsettoken: settoken <username> <tokenkey> - sets the key (hex) for a token\n";
 	echo "\tsettype: settype <username> <tokentype> - sets a token type for a user\n";
 	echo "\tgetusers: getusers - gets a list of users\n";
-	echo "\tgetotk: getotk <username> - gets the OTK png for a key\n";
+	echo "\tgetotk: getotk <username> - gets the OTKID for a key\n";
+	echo "\tradauth: radauth <username> <pin> - for radius, only returns a code\n";
 	return 0;	
 }
 
 switch($argv[1]) {
+	case "radauth":
+		if($myAC->authUserToken($argv[2], $argv[3])==1) {
+			return 0;
+		} else {
+			return 255;
+		}
+		break;
 	case "getotk":
-		$val = $myAC->getOtkPng($argv[2]);
+		$val = $myAC->getOtkID($argv[2]);
 		if($val === false) {
 			echo "Failure\n";
 		} else {
-			$hand = fopen("val.png", "w");
-			fwrite($hand, $val);
-			fclose($hand);
-			echo "In val.png\n";
+			echo "$val\n";
 		}
 		break;
 	case "auth":
