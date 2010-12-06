@@ -250,7 +250,10 @@ abstract class GoogleAuthenticator {
 		$data = $this->internalGetData($user);
 		$toktype = $data["tokentype"];
 		$key = $this->helperhex2b32($data["tokenkey"]);
-		$counter = $data["tokencounter"];
+
+		// token counter should be one more then current token value, otherwise
+		// it gets confused
+		$counter = $data["tokencounter"]+1;
 		$toktype = strtolower($toktype);
 		if($toktype == "hotp") {
 			$url = "otpauth://$toktype/$user?secret=$key&counter=$counter";
