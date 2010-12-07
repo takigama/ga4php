@@ -122,9 +122,16 @@ if($pid == -1) {
 					$tokenone = $msg["tokenone"];
 					$tokentwo = $msg["tokentwo"];
 					
-					msg_send($cl_queue,MSG_SYNC_TOKEN, $myga->resyncCode($username, $tokenone, $tokentwo));
+					msg_send($cl_queue, MSG_SYNC_TOKEN, $myga->resyncCode($msg["username"], $tokenone, $tokentwo));
 				}
 				
+				break;
+			case MSG_GET_TOKEN_TYPE:
+				if(!isset($msg["username"])) {
+					msg_send($cl_queue, MSG_GET_TOKEN_TYPE, false);
+				} else {
+					msg_send($cl_queue, MSG_GET_TOKEN_TYPE, $myga->getTokenType($msg["username"]));
+				}
 				break;
 			case MSG_ADD_USER_TOKEN:
 				echo "Call to add user token\n";
