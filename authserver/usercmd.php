@@ -37,10 +37,18 @@ if(!isset($argv[1])) {
 	echo "\tgetusers: getusers - gets a list of users\n";
 	echo "\tgetotk: getotk <username> - gets the OTKID for a key\n";
 	echo "\tradauth: radauth <username> <pin> - for radius, only returns a code\n";
+	echo "\tsynctoken: synctoken <username> <tokenone> <tokentwo> - resync's a hotp token based on two token codes\n";
 	return 0;	
 }
 
 switch($argv[1]) {
+	case "synctoken":
+		if($myAC->syncUserToken($argv[2], $argv[3], $argv[4])) {
+			echo "Token synced\n";
+		} else {
+			echo "Token not synced\n";
+		}
+		break;
 	case "radauth":
 		if($myAC->authUserToken($argv[2], $argv[3])==1) {
 			syslog(LOG_WARNING, "Got good request for user, ".$argv[2]);
