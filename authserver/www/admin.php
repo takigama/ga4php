@@ -56,6 +56,21 @@ if(isset($_REQUEST["edituser"])) {
 </table>
 <input type="submit" value="Update">
 </form>
+<?php
+if($myAC->getUserTokenType($username)=="HOTP") {
+?> 
+<form method="post" action="?action=synctoken&username=<?php echo $username?>">
+<h3>Resync Tokens</h3>
+<table>
+<tr><td>Token One</td><td><input type="text" name="tokenone"></td></tr>
+<tr><td>Token Two</td><td><input type="text" name="tokentwo"></td></tr>
+</table>
+<input type="submit" value="Sync">
+</form>
+<?php
+}
+?> 
+
 <form method="post" action="?action=customtoken&username=<?php echo $username ?>">
 <h3>Custom Tokens - doesnt work yet</h3><br>
 For assiging in a user-created or hardware tokens<br>

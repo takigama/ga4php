@@ -222,7 +222,7 @@ abstract class GoogleAuthenticator {
 						$stest2 = $this->oath_hotp($tkey, $i+1);
 						if($code2 == $stest2) {
 							$tokendata["tokencounter"] = $i+1;
-							internalPutData($username, $tokendata);						
+							$this->internalPutData($username, $tokendata);						
 							return true;
 						}
 					}

@@ -38,10 +38,15 @@ if(!isset($argv[1])) {
 	echo "\tgetotk: getotk <username> - gets the OTKID for a key\n";
 	echo "\tradauth: radauth <username> <pin> - for radius, only returns a code\n";
 	echo "\tsynctoken: synctoken <username> <tokenone> <tokentwo> - resync's a hotp token based on two token codes\n";
+	echo "\ttokentype: tokentype <username> - gets the token type for a user\n";
 	return 0;	
 }
 
 switch($argv[1]) {
+	case "tokentype":
+		$msg = $myAC->getUserTokenType($argv[2]);
+		echo "token type: $msg\n";
+		break;
 	case "synctoken":
 		if($myAC->syncUserToken($argv[2], $argv[3], $argv[4])) {
 			echo "Token synced\n";

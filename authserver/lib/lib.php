@@ -17,6 +17,7 @@ define("MSG_GET_OTK_PNG", 10);
 define("MSG_GET_OTK_ID", 11);
 define("MSG_DELETE_USER_TOKEN", 12);
 define("MSG_SYNC_TOKEN", 13);
+define("MSG_GET_TOKEN_TYPE", 14);
 
 // BASE_DIR = 
 $BASE_DIR = realpath(dirname(__FILE__)."/../../");

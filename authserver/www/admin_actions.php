@@ -10,6 +10,29 @@ else $loggedin = false;
 
 if(isset($_REQUEST["action"])) {
 	switch($_REQUEST["action"]) {
+		case "customtoken":
+			$ttype = $_REQUEST["tokentype"];
+			$tkey = $_REQUEST["tokenkey"];
+			$username = $_REQUEST["username"];
+			$ret1 = $myAC->setUserTokenType($username, $ttype);
+			$ret2 = $myAC->setUserToken($username, $tkey);
+			error_log("got, $ret1, $ret2...");
+			break;
+		case "synctoken":
+			$username = $_REQUEST["username"];
+			$tokenone = $_REQUEST["tokenone"];
+			$tokentwo = $_REQUEST["tokentwo"];
+			$retval = $myAC->syncUserToken($username, $tokenone, $tokentwo);
+			error_log("retval: $retval");
+			if($retval) {
+				header("Location: ?message=".urlencode("token synced"));
+				exit(0);
+			} else {
+				header("Location: ?error=".urlencode("token not synced"));
+				exit(0);
+			}
+			
+			break;
 		case "recreatehotptoken":
 			$username = $_REQUEST["username"];
 			$myAC->addUser($username, "HOTP");
