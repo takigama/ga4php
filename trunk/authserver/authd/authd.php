@@ -44,6 +44,7 @@ if($pid == -1) {
 					$clients[$i]["ip"] = $row["rad_ip"];
 					$clients[$i]["secret"] = $row["rad_secret"];
 					$clients[$i]["desc"] = $row["rad_desc"];
+					$i++;
 				}
 				msg_send($cl_queue, MSG_GET_RADIUS_CLIENTS, $clients);
 				break;
@@ -62,11 +63,31 @@ if($pid == -1) {
 				$clientsecret = $msg["clientsecret"];
 				$clientip = $msg["clientip"];
 				$clientdesc = $msg["clientdescription"];
-				$sql = "insert into radclients values (NULL, '$client', '$clientip', '$clientsecret', '$clientdesc')";
 				$dbo = getDatabase();
+				
+				// check for existing clients with same name
+				$sql = "select * from radclients where rad_name='$client'";
+				echo "doing select, $sql\n";
 				$res = $dbo->query($sql);
-				updateRadius();
-				msg_send($cl_queue, MSG_ADD_RADIUS_CLIENT, true);
+				if($res->fetchColumn() > 0) {
+					msg_send($cl_queue, MSG_ADD_RADIUS_CLIENT, "name");
+						
+				} else {
+					// check for existing clients with same ip
+					$sql = "select * from radclients where rad_ip='$clientip'";
+					$res = $dbo->query($sql);
+					echo "doing select, $sql\n";
+					if($res->fetchColumn() > 0) {
+						msg_send($cl_queue, MSG_ADD_RADIUS_CLIENT, "ip");
+								
+					} else {
+						$sql = "insert into radclients values (NULL, '$client', '$clientip', '$clientsecret', '$clientdesc')";
+						$res = $dbo->query($sql);
+						updateRadius();
+						msg_send($cl_queue, MSG_ADD_RADIUS_CLIENT, true);
+						break;
+					}
+				}
 				break;
 			case MSG_DELETE_USER_TOKEN:
 				$username = $msg["username"];

@@ -10,6 +10,27 @@ else $loggedin = false;
 
 if(isset($_REQUEST["action"])) {
 	switch($_REQUEST["action"]) {
+		case "deleteradclient":
+			$clientname = $_REQUEST["clientname"];
+			$ret = $myAC->deleteRadiusClient($clientname);
+			header("Location: ?message=".urlencode("Client Deleted"));
+			exit(0);
+			break;
+		case "addradclient":
+			$clientname = $_REQUEST["clientname"];
+			$clientip = $_REQUEST["clientip"];
+			$clientsecret = $_REQUEST["clientsecret"];
+			$clientdesc = $_REQUEST["clientdesc"];
+			$ret = $myAC->addRadiusClient($clientname, $clientip, $clientsecret, $clientdesc);
+			if($ret === true) {
+				header("Location: ?message=".urlencode("Client Added"));
+			} else if ($ret == "name") {
+				header("Location: ?error=".urlencode("Client Name Already Existed"));
+			} else if ($ret == "ip") {
+				header("Location: ?error=".urlencode("Client IP Already Existed"));
+			}
+			exit(0);
+			break;
 		case "customtoken":
 			$ttype = $_REQUEST["tokentype"];
 			$tkey = $_REQUEST["tokenkey"];

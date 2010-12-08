@@ -23,6 +23,7 @@ define("MSG_REMOVE_RADIUS_CLIENT", 16);
 define("MSG_ADD_RADIUS_CLIENT", 17);
 
 // BASE_DIR = 
+// messy
 $BASE_DIR = realpath(dirname(__FILE__)."/../../");
 global $BASE_DIR;
 
@@ -44,7 +45,9 @@ function generateRandomString()
 function updateRadius()
 {
 	// this is hardcoded for now.
+	//$clientfile = "/etc/freeradius/clients.conf";
 	$clientfile = "/tmp/clients.conf";
+	$reloadinit = "/etc/init.d/freeradius restart";
 	
 	$db = getDatabase();
 	
@@ -56,10 +59,12 @@ function updateRadius()
 		$cname = $row["rad_name"];
 		$cip = $row["rad_ip"];
 		$csec = $row["rad_secret"];
-		$lines = "client $cname {\nipaddr = $cip\nsecret = $csec\nrequire_message_authenticator = no\n}";
+		$lines = "client $cname {\nipaddr = $cip\nsecret = $csec\nrequire_message_authenticator = no\n}\n\n";
 		fwrite($hand, $lines);
 	}
 	fclose($hand);
+	// not yet
+	//system($reloadinit);
 }
 
 
