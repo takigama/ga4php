@@ -30,7 +30,44 @@ if($pid == -1) {
 	
 	while(true) {
 		msg_receive($sr_queue, 0, $msg_type, 16384, $msg);
+		echo "got message of type $msg_type\n";
 		switch($msg_type) {
+			case MSG_GET_RADIUS_CLIENTS:
+				$sql = "select * from radclients";
+				$dbo = getDatabase();
+				$res = $dbo->query($sql);
+				$clients = "";
+				$i=0;
+				foreach($res as $row) {
+					// 		$sql = 'CREATE TABLE "radclients" ("rad_id" INTEGER PRIMARY KEY AUTOINCREMENT,"rad_name" TEXT, "rad_ip" TEXT, "rad_secret" TEXT, "rad_desc" TEXT);';
+					$clients[$i]["name"] = $row["rad_name"];
+					$clients[$i]["ip"] = $row["rad_ip"];
+					$clients[$i]["secret"] = $row["rad_secret"];
+					$clients[$i]["desc"] = $row["rad_desc"];
+				}
+				msg_send($cl_queue, MSG_GET_RADIUS_CLIENTS, $clients);
+				break;
+			case MSG_REMOVE_RADIUS_CLIENT:
+				// it should send us a client by rad_name - doesnt work yet
+				$client = $msg["clientname"];
+				$sql = "delete from radclients where rad_name='$client'";
+				$dbo = getDatabase();
+				$res = $dbo->query($sql);
+				updateRadius();
+				msg_send($cl_queue, MSG_REMOVE_RADIUS_CLIENT, true);
+				break;
+			case MSG_ADD_RADIUS_CLIENT:
+				echo "in addradclient\n";
+				$client = $msg["clientname"];
+				$clientsecret = $msg["clientsecret"];
+				$clientip = $msg["clientip"];
+				$clientdesc = $msg["clientdescription"];
+				$sql = "insert into radclients values (NULL, '$client', '$clientip', '$clientsecret', '$clientdesc')";
+				$dbo = getDatabase();
+				$res = $dbo->query($sql);
+				updateRadius();
+				msg_send($cl_queue, MSG_ADD_RADIUS_CLIENT, true);
+				break;
 			case MSG_DELETE_USER_TOKEN:
 				$username = $msg["username"];
 				

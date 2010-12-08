@@ -3,6 +3,34 @@
 require_once("lib.php");
 
 class GAAuthClient {
+	function addRadiusClient($clientname, $clientip, $clientsecret, $clientdesc) {
+		global $MSG_QUEUE_KEY_ID_SERVER, $MSG_QUEUE_KEY_ID_CLIENT;
+		
+		
+		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_SERVER)) {
+			return false;
+		}
+
+		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_CLIENT)) {
+			return false;
+		}
+		// TODO we need to setup a client queue sem lock here
+		
+		$cl_queue = msg_get_queue($MSG_QUEUE_KEY_ID_CLIENT);
+		$sr_queue = msg_get_queue($MSG_QUEUE_KEY_ID_SERVER);
+		
+	
+		$message["clientname"] = $clientname;
+		$message["clientsecret"] = $clientsecret;
+		$message["clientip"] = $clientip;
+		$message["clientdescription"] = $clientdesc;
+		
+		msg_send($sr_queue, MSG_ADD_RADIUS_CLIENT, $message, true, true, $msg_err);
+		
+		msg_receive($cl_queue, 0, $msg_type, 16384, $msg);
+		return $msg;
+	}
+	
 	function syncUserToken($username, $tokenone, $tokentwo) {
 		global $MSG_QUEUE_KEY_ID_SERVER, $MSG_QUEUE_KEY_ID_CLIENT;
 		
@@ -26,8 +54,7 @@ class GAAuthClient {
 		msg_send($sr_queue, MSG_SYNC_TOKEN, $message, true, true, $msg_err);
 		
 		msg_receive($cl_queue, 0, $msg_type, 16384, $msg);
-		return $msg;		
-		
+		return $msg;
 	}
 	
 	function getUserTokenType($username) {
