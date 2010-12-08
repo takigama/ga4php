@@ -210,9 +210,10 @@ if($pid == -1) {
 					$myga->setUser($username, $tokentype, "", $hexkey);
 					
 					$url = $myga->createUrl($username);
+					echo "Url was: $url\n";
 					if(!file_exists("$BASE_DIR/authserver/authd/otks")) mkdir("$BASE_DIR/authserver/authd/otks");
 					$otk = generateRandomString();
-					system("qrencode -o $BASE_DIR/authserver/authd/otks/$otk.png $url");
+					system("qrencode -o $BASE_DIR/authserver/authd/otks/$otk.png '$url'");
 					
 					$sql = "update users set users_otk='$otk' where users_username='$username'";
 					$dbo = getDatabase();
@@ -380,7 +381,7 @@ if($pid == -1) {
 				break;
 			case MSG_GET_USERS:
 				// TODO this needs to be better
-				$sql = "select * from users";
+				$sql = "select * from users order by users_username";
 				
 				$dbo = getDatabase();
 				$res = $dbo->query($sql);

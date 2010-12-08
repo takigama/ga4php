@@ -20,9 +20,10 @@ if(isset($_REQUEST["gettoken"])) {
 	if($otk == "") {
 ?>
 <html>
-Hello <?php echo $realname?>, we're sorry, but your One Time Key has already been picked up or you
-dont currently have a token. If you believe this in error, please contact the site admin immediately
-as it could mean your key has been compromised.
+Hello <?php echo $realname?>, we're sorry, but your One Time Key has<br>
+already been picked up or you dont currently have a token. If you believe<br>
+this in error, please contact the site admin immediately as it could mean<br>
+your key has been compromised.<br>
 </html>
 <?php
 	exit(0); 
@@ -55,10 +56,10 @@ Once you have the key, you may try logging into the user site <a href="index.php
 ?>
 <html>
 Hello <?php echo $realname?>, welcome to the One Time Key retreival site. Before we present<br>
-your key, you must have your phone ready to accept it as the key will only be presented once.<br>
+your key, you must have your phone ready to accept it as the key can only be presented once.<br>
 If your phone is not ready to accept the key, the key needs to be regenerated, so only proceed<br>
 if you phone is on, you have clicked on "scan account barcode" and the phone is ready to<br>
-scan, please proceed.<br>
+scan the code.<br>
 <br>
 If you are ready to proceed, click <a href="index.php?gettoken&username=<?php echo $username?>&ready=true&otkid=<?php echo $otkid?>">here</a>.
 </html>
@@ -92,7 +93,10 @@ Token Code: <input type="text" name="tokencode"><br>
 } else {
 ?>
 
-Hi user
+Welcome, you have successfully logged into the<br>
+user site, but there is no content here to view.<br>
+Later, this site will be where you might resync your<br>
+token or change pin codes and the like<br>
 </html>
 
 <hr><a href="?action=logout">Logout</a>

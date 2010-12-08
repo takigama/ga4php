@@ -37,7 +37,7 @@ if(isset($_REQUEST["action"])) {
 				header("Location: index.php");
 			} else {
 				error_log("login failed, $username, $token");
-				header("Location: index.php?message=loginfail");
+				header("Location: index.php?error=".urlencode("Login Failed"));
 			}
 			break;
 		case "logout":
