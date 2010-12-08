@@ -30,6 +30,54 @@ class GAAuthClient {
 		msg_receive($cl_queue, 0, $msg_type, 16384, $msg);
 		return $msg;
 	}
+
+	function deleteRadiusClient($clientname) {
+		global $MSG_QUEUE_KEY_ID_SERVER, $MSG_QUEUE_KEY_ID_CLIENT;
+		
+		
+		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_SERVER)) {
+			return false;
+		}
+
+		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_CLIENT)) {
+			return false;
+		}
+		// TODO we need to setup a client queue sem lock here
+		
+		$cl_queue = msg_get_queue($MSG_QUEUE_KEY_ID_CLIENT);
+		$sr_queue = msg_get_queue($MSG_QUEUE_KEY_ID_SERVER);
+		
+	
+		$message["clientname"] = $clientname;
+		msg_send($sr_queue, MSG_REMOVE_RADIUS_CLIENT, $message, true, true, $msg_err);
+		
+		msg_receive($cl_queue, 0, $msg_type, 16384, $msg);
+		return $msg;
+	}
+	
+	function getRadiusClients() {
+		global $MSG_QUEUE_KEY_ID_SERVER, $MSG_QUEUE_KEY_ID_CLIENT;
+		
+		
+		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_SERVER)) {
+			return false;
+		}
+
+		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_CLIENT)) {
+			return false;
+		}
+		// TODO we need to setup a client queue sem lock here
+		
+		$cl_queue = msg_get_queue($MSG_QUEUE_KEY_ID_CLIENT);
+		$sr_queue = msg_get_queue($MSG_QUEUE_KEY_ID_SERVER);
+		
+	
+		msg_send($sr_queue, MSG_GET_RADIUS_CLIENTS, "", true, true, $msg_err);
+		
+		msg_receive($cl_queue, 0, $msg_type, 16384, $msg);
+		return $msg;
+	}
+	
 	
 	function syncUserToken($username, $tokenone, $tokentwo) {
 		global $MSG_QUEUE_KEY_ID_SERVER, $MSG_QUEUE_KEY_ID_CLIENT;

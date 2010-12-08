@@ -39,17 +39,35 @@ if(!isset($argv[1])) {
 	echo "\tradauth: radauth <username> <pin> - for radius, only returns a code\n";
 	echo "\tsynctoken: synctoken <username> <tokenone> <tokentwo> - resync's a hotp token based on two token codes\n";
 	echo "\ttokentype: tokentype <username> - gets the token type for a user\n";
-	echo "\taddradclient: addradclient <client_name> <client_ip> <client_secret>\n";
+	echo "\taddradclient: addradclient <client_name> <client_ip> <client_secret> \"<description>\"- adds a radius client\n";
+	echo "\trmradclient: rmradclient <client_name> - removes a radius client with the name <client_name>\n";
+	echo "\tgetradclients: getradclients - returns a list of radius clients\n";
 	return 0;	
 }
 
 switch($argv[1]) {
-	case "addradclient":
-		$msg = $myAC->addRadiusClient($argv[2], $argv[3], $argv[4], "");
+	case "rmradclient":
+		$msg = $myAC->deleteRadiusClient($argv[2]);
 		if($msg) {
+			echo "Successfully deleted\n";
+		}
+		break;
+	case "getradclients":
+		$msg = $myAC->getRadiusClients();
+		foreach($msg as $client) {
+			if($client["desc"]=="")	$desc = "no description set";
+			else $desc = $client["desc"];
+			echo $client["name"]." is ".$client["ip"].", $desc\n";
+		}
+		break;
+	case "addradclient":
+		$msg = $myAC->addRadiusClient($argv[2], $argv[3], $argv[4], $argv[5]);
+		if($msg === true) {
 			echo "Added successfully\n";
-		} else {
-			echo "Not added\n";
+		} else if ($msg == "name") {
+			echo "Client with same name exists already\n";
+		} else if ($msg == "ip") {
+			echo "Client with same IP already exists\n";
 		}
 		break;
 	case "tokentype":

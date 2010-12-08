@@ -84,6 +84,11 @@ Token Type
 <input type="submit" value="Set">
 </form>
 <?php
+} else if(isset($_REQUEST["editclient"])) {
+?>
+this page is for editing radius clients, it doesnt exist yet.. What you need to do is delete the client and re-add it... go <a href="admin.php">back</a>
+</html>
+<?php 
 } else {
 ?>
 <hr><h2>Users</h2>
@@ -132,8 +137,30 @@ if(isset($_REQUEST["action"])) if($_REQUEST["action"] == "getotk") {
 
 ?>
 <hr><h2>Radius Clients</h2>
-Not yet implemented
-
+<table border="1">
+<tr><th>Name</th><th>IP Address</th><th>Description</th><th>Delete</th></tr>
+<?php
+$msg = $myAC->getRadiusClients();
+foreach($msg as $client) {
+	if($client["desc"]=="")	$desc = "no description set";
+	else $desc = $client["desc"];
+	$clientname = $client["name"];
+	$clientip = $client["ip"];
+	echo "<tr><td><a href=\"?editclient=$clientname\">$clientname</a></td><td>$clientip</td><td>$desc</td><td><a href=\"?action=deleteradclient&clientname=$clientname\">Delete</a></td></tr>";
+}
+?>
+</table>
+<br>
+<h3>Add a Radius Client</h3>
+<form method="post" action="?action=addradclient">
+<table>
+<tr><td>Client Name</td><td><input type="text" name="clientname"></td></tr>
+<tr><td>Client IP</td><td><input type="text" name="clientip"></td></tr>
+<tr><td>Client Secret</td><td><input type="text" name="clientsecret"></td></tr>
+<tr><td>Client Description</td><td><input type="text" name="clientdesc"></td></tr>
+</table>
+<input type="submit" name="go" value="add">
+</form>
 <hr><a href="?action=logout">Logout</a> <a href="admin.php">Home</a>
 
 <?php 
