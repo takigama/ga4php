@@ -72,8 +72,9 @@ if($myAC->getUserTokenType($username)=="HOTP") {
 ?> 
 
 <form method="post" action="?action=customtoken&username=<?php echo $username ?>">
-<h3>Custom Tokens - doesnt work yet</h3><br>
-For assiging in a user-created or hardware tokens<br>
+<h3>Custom Tokens</h3><br>
+For assiging in a user-created or hardware tokens.<br>
+If you assign a token this way, any previous token is removed and forever gone.<br>
 Token Key (hex) <input type="text" name="tokenkey"><br>
 Token Type 
 <select name="tokentype">

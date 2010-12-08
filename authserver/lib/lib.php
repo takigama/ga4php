@@ -18,6 +18,9 @@ define("MSG_GET_OTK_ID", 11);
 define("MSG_DELETE_USER_TOKEN", 12);
 define("MSG_SYNC_TOKEN", 13);
 define("MSG_GET_TOKEN_TYPE", 14);
+define("MSG_GET_RADIUS_CLIENTS", 15);
+define("MSG_REMOVE_RADIUS_CLIENT", 16);
+define("MSG_ADD_RADIUS_CLIENT", 17);
 
 // BASE_DIR = 
 $BASE_DIR = realpath(dirname(__FILE__)."/../../");
@@ -38,8 +41,30 @@ function generateRandomString()
 	return $str;
 }
 
+function updateRadius()
+{
+	// this is hardcoded for now.
+	$clientfile = "/tmp/clients.conf";
+	
+	$db = getDatabase();
+	
+	echo "in updateradius\n";
+	$hand = fopen($clientfile, "w");
+	$sql = "select * from radclients";
+	$res = $db->query($sql);
+	foreach($res as $row) {
+		$cname = $row["rad_name"];
+		$cip = $row["rad_ip"];
+		$csec = $row["rad_secret"];
+		$lines = "client $cname {\nipaddr = $cip\nsecret = $csec\nrequire_message_authenticator = no\n}";
+		fwrite($hand, $lines);
+	}
+	fclose($hand);
+}
 
-function getDatabase() {
+
+function getDatabase()
+{
 	$dbobject = false;
 	global $BASE_DIR;
 	if(file_exists("$BASE_DIR/authserver/authd/gaasdata.sqlite")) {
@@ -55,6 +80,8 @@ function getDatabase() {
 			error_log("execpt on db open");
 		}
 		$sql = 'CREATE TABLE "users" ("users_id" INTEGER PRIMARY KEY AUTOINCREMENT,"users_username" TEXT, "users_realname" TEXT, "users_password" TEXT, "users_tokendata" TEXT, "users_otk" TEXT);';
+		$dbobject->query($sql);
+		$sql = 'CREATE TABLE "radclients" ("rad_id" INTEGER PRIMARY KEY AUTOINCREMENT,"rad_name" TEXT, "rad_ip" TEXT, "rad_secret" TEXT, "rad_desc" TEXT);';
 		$dbobject->query($sql);
 	}
 	

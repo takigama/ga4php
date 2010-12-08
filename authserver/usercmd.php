@@ -39,10 +39,19 @@ if(!isset($argv[1])) {
 	echo "\tradauth: radauth <username> <pin> - for radius, only returns a code\n";
 	echo "\tsynctoken: synctoken <username> <tokenone> <tokentwo> - resync's a hotp token based on two token codes\n";
 	echo "\ttokentype: tokentype <username> - gets the token type for a user\n";
+	echo "\taddradclient: addradclient <client_name> <client_ip> <client_secret>\n";
 	return 0;	
 }
 
 switch($argv[1]) {
+	case "addradclient":
+		$msg = $myAC->addRadiusClient($argv[2], $argv[3], $argv[4], "");
+		if($msg) {
+			echo "Added successfully\n";
+		} else {
+			echo "Not added\n";
+		}
+		break;
 	case "tokentype":
 		$msg = $myAC->getUserTokenType($argv[2]);
 		echo "token type: $msg\n";
@@ -133,5 +142,7 @@ switch($argv[1]) {
 			echo "\tHas Token?: ".$hastoken."\n\n";
 		}
 		break;
+	default:
+		echo "See the usage...\n";
 }
 ?>
