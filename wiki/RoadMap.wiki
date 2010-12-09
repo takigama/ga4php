@@ -20,6 +20,7 @@ GA4PHP will (hopefully) be a fully fledged authentication system that is easy to
 
 
 = Upcoming Features =
+  # re-write the authd/authclient from scratch in a non-braindead way
   # forcing ssl
   # QRCode generator entirely in PHP (yeah right...)
   # mOTP
