@@ -1,5 +1,3 @@
-#The roadmap for features in this software
-
 = GA4PHP RoadMap =
 
 GA4PHP will (hopefully) be a fully fledged authentication system that is easy to use and/or easy to add to an existing application while maintaining a high level of security.
@@ -21,6 +19,7 @@ GA4PHP will (hopefully) be a fully fledged authentication system that is easy to
 
 = Upcoming Features =
   # re-write the authd/authclient from scratch in a non-braindead way
+  # add a soap connector for auth/authclient
   # forcing ssl
   # QRCode generator entirely in PHP (yeah right...)
   # mOTP
