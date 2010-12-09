@@ -4,11 +4,24 @@
 
 GA4PHP will (hopefully) be a fully fledged authentication system that is easy to use and/or easy to add to an existing application while maintaining a high level of security.
 
-= Upcoming Features =
+= Currently Implemented = 
+  # simple auth server based on a radius approach with a web managment interface
+  # GA4PHP class which provides a simple interface and simple data management
+  # lots of example provided for ways of provisioning users in various backends
+  # Can support non-google authenticators where the key is provided in some format that leads to hex
 
-  # Drop database for named functions (i.e. remove sqlite and get/put data via functions passed in at init time).
+
+= Current Problems = 
+  # GA4PHP class needs exceptions
+  # auth server is serial - i.e. one auth request at a time thanks to single IPC pipe (or the way i manage it)
+  # generating QRcodes - currently only really works on linux based stuff and uses the qrencode binary
+  # many possible lock-up scenarios in the authserver/authclient relationship
+  # current authserver is a code mess
+
+
+= Upcoming Features =
   # forcing ssl
   # QRCode generator entirely in PHP (yeah right...)
-  # mOTP and support for non-google authenticators (including hardware ones).
+  # mOTP
   # third party auth? i.e. website one is the auth provider for website 2 as a service
   # integration plugins for some common applications (mediawiki, drupal, wordpress..)
