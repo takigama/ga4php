@@ -15,6 +15,7 @@ GA4PHP will (hopefully) be a fully fledged authentication system that is easy to
   # generating QRcodes - currently only really works on linux based stuff and uses the qrencode binary
   # many possible lock-up scenarios in the authserver/authclient relationship
   # current authserver is a code mess
+  # would love to see people actually using it for something interesting
 
 
 = Upcoming Features =
