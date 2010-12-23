@@ -7,6 +7,7 @@ GA4PHP will (hopefully) be a fully fledged authentication system that is easy to
   # GA4PHP class which provides a simple interface and simple data management
   # lots of example provided for ways of provisioning users in various backends
   # Can support non-google authenticators where the key is provided in some format that leads to hex
+  # moved from IPC comms to TCP comms for authd/authserver
 
 
 = Current Problems = 
