@@ -98,7 +98,7 @@ function closeDatabase($db) {
 
 class gaasGA extends GoogleAuthenticator {
 	function getData($username) {
-		echo "called into getdata\n";
+		//echo "called into getdata\n";
 		
 		// get our database connection
 		$dbObject = getDatabase();
@@ -110,17 +110,17 @@ class gaasGA extends GoogleAuthenticator {
 		$result = $dbObject->query($sql);
 		
 		// check the result
-		echo "next1\n";
+		//echo "next1\n";
 		if(!$result) return false;
 		
 		// now just retreieve all the data (there should only be one, but whatever)
-		echo "next2\n";
+		//echo "next2\n";
 		$tokendata = false;
 		foreach($result as $row) {
 			$tokendata = $row["users_tokendata"];
 		}
 
-		echo "next3, $username, $tokendata\n";
+		//echo "next3, $username, $tokendata\n";
 		// now we have our data, we just return it. If we got no data
 		// we'll just return false by default
 		return $tokendata;
@@ -138,11 +138,11 @@ class gaasGA extends GoogleAuthenticator {
 		$res = $dbObject->query($sql);
 		if($res->fetchColumn() > 0) {
 			// do update
-			error_log("doing userdata update");
+			//error_log("doing userdata update");
 			$sql = "update users set users_tokendata='$data' where users_username='$username'";
 		} else {
 			// do insert
-			error_log("doing user data create");
+			//error_log("doing user data create");
 			$sql = "insert into users values (NULL, '$username', '', '', '$data', '')";
 		}
 		

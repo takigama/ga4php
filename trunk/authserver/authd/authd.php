@@ -19,7 +19,7 @@ if($pid == -1) {
 	
 } else if($pid) {
 	// i am the parent, i shall leave
-	echo "i am a parent, i leave\n";
+	//echo "i am a parent, i leave\n";
 	exit(0);
 } else {
 	// here is where i need to swithc to TCP network protocol stuff
@@ -36,7 +36,6 @@ if($pid == -1) {
 	$res = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 	socket_bind($res, "127.0.0.1", $TCP_PORT_NUMBER);
 	socket_listen($res);
-	echo "am now listneing\n";
 
 	while(true) {
 		$data_socket = socket_accept($res);
@@ -68,10 +67,10 @@ if($pid == -1) {
 			$msg_type = $component["type"];
 			$msg = $component["data"];
 
-			echo "I now have a message of $msg_type\n";
-			echo "with data:\n";
-			print_r($msg);
-			echo "eof\n";
+			//echo "I now have a message of $msg_type\n";
+			//echo "with data:\n";
+			//print_r($msg);
+			//echo "eof\n";
 			// the switch should now set a $data_returned value that gets bundled up and sent back to the client
 			// HERES WHERE THE SWITCH GOES
 			// ******
@@ -102,7 +101,7 @@ if($pid == -1) {
 					$data_returned = true;
 					break;
 				case MSG_ADD_RADIUS_CLIENT:
-					echo "in addradclient\n";
+					//echo "in addradclient\n";
 					$client = $msg["clientname"];
 					$clientsecret = $msg["clientsecret"];
 					$clientip = $msg["clientip"];
@@ -111,7 +110,7 @@ if($pid == -1) {
 					
 					// check for existing clients with same name
 					$sql = "select * from radclients where rad_name='$client'";
-					echo "doing select, $sql\n";
+					//echo "doing select, $sql\n";
 					$res = $dbo->query($sql);
 					if($res->fetchColumn() > 0) {
 						$data_returned = "name";
@@ -120,7 +119,7 @@ if($pid == -1) {
 						// check for existing clients with same ip
 						$sql = "select * from radclients where rad_ip='$clientip'";
 						$res = $dbo->query($sql);
-						echo "doing select, $sql\n";
+						//echo "doing select, $sql\n";
 						if($res->fetchColumn() > 0) {
 							$data_returned = "ip";
 									
@@ -155,7 +154,7 @@ if($pid == -1) {
 					$data_returned = true;
 					break;
 				case MSG_AUTH_USER_TOKEN:
-					echo "Call to auth user token\n";
+					//echo "Call to auth user token\n";
 					// minimal checking, we leav it up to authenticateUser to do the real
 					// checking
 					if(!isset($msg["username"])) $msg["username"] = "";
@@ -237,7 +236,7 @@ if($pid == -1) {
 					}
 					break;
 				case MSG_ADD_USER_TOKEN:
-					echo "Call to add user token\n";
+					//echo "Call to add user token\n";
 					if(!isset($msg["username"])) {
 						$data_returned = false;
 					} else {
@@ -255,7 +254,7 @@ if($pid == -1) {
 						$myga->setUser($username, $tokentype, "", $hexkey);
 						
 						$url = $myga->createUrl($username);
-						echo "Url was: $url\n";
+						//echo "Url was: $url\n";
 						if(!file_exists("$BASE_DIR/authserver/authd/otks")) mkdir("$BASE_DIR/authserver/authd/otks");
 						$otk = generateRandomString();
 						system("qrencode -o $BASE_DIR/authserver/authd/otks/$otk.png '$url'");
@@ -268,7 +267,7 @@ if($pid == -1) {
 					}
 					break;
 				case MSG_DELETE_USER:
-					echo "Call to del user\n";
+					//echo "Call to del user\n";
 					if(!isset($msg["username"])) {
 						$data_returned = false;	
 					} else {
@@ -296,7 +295,7 @@ if($pid == -1) {
 					break;
 				case MSG_AUTH_USER_PASSWORD:
 					// TODO
-					echo "Call to auth user pass\n";
+					//echo "Call to auth user pass\n";
 					if(!isset($msg["username"])) {
 						$data_returned = false;
 						break;
@@ -318,7 +317,7 @@ if($pid == -1) {
 					
 					// TODO now do auth
 					$ourpass = hash('sha512', $password);
-					echo "ourpass: $ourpass\nourhash: $pass\n";
+					//echo "ourpass: $ourpass\nourhash: $pass\n";
 					if($ourpass == $pass) {
 						$data_returned = true;
 						
@@ -329,29 +328,29 @@ if($pid == -1) {
 					
 					break;
 				case MSG_SET_USER_PASSWORD:
-					echo "how on earth is that happening Call to set user pass, wtf?\n";
+					//echo "how on earth is that happening Call to set user pass, wtf?\n";
 					// TODO
-					print_r($msg);
+					//print_r($msg);
 					if(!isset($msg["username"])) {
 						$data_returned = false;
-						echo "in break 1\n";
+						//echo "in break 1\n";
 						break;
 					}
 					if(!isset($msg["password"])) {
 						$data_returned = false;
-						echo "in break 1\n";
+						//echo "in break 1\n";
 						break;
 					}
 					
 					$username = $msg["username"];
 					$password = $msg["password"];
 					
-					echo "would set pass for $username, to $password\n";
+					//echo "would set pass for $username, to $password\n";
 					if($password == "") $pass = "";
 					else $pass = hash('sha512', $password);
 					
 					$dbo = getDatabase();
-					echo "in set user pass for $username, $pass\n";
+					//echo "in set user pass for $username, $pass\n";
 					$sql = "update users set users_password='$pass' where users_username='$username'";
 					
 					$dbo->query($sql);
@@ -363,7 +362,7 @@ if($pid == -1) {
 					// TODO now set pass
 					break;
 				case MSG_SET_USER_REALNAME:
-					echo "Call to set user realname\n";
+					//echo "Call to set user realname\n";
 					// TODO
 					if(!isset($msg["username"])) {
 						$data_returned = false;
@@ -387,7 +386,7 @@ if($pid == -1) {
 					break;
 				case MSG_SET_USER_TOKEN:
 					// TODO
-					echo "Call to set user token\n";
+					//echo "Call to set user token\n";
 					if(!isset($msg["username"])) {
 						$data_returned = false;
 						break;
@@ -407,7 +406,7 @@ if($pid == -1) {
 					break;			
 				case MSG_SET_USER_TOKEN_TYPE:
 					// TODO
-					echo "Call to set user token type\n";
+					//echo "Call to set user token type\n";
 					if(!isset($msg["username"])) {
 						$data_returned = false;
 						break;
@@ -441,7 +440,7 @@ if($pid == -1) {
 						} else {
 							$users[$i]["haspass"] = false;
 						}
-						echo "user: ".$users[$i]["username"]." has tdata: \"".$row["users_tokendata"]."\"\n";
+						//echo "user: ".$users[$i]["username"]." has tdata: \"".$row["users_tokendata"]."\"\n";
 						if($row["users_tokendata"]!="") {
 							$users[$i]["hastoken"] = true;
 						} else {
