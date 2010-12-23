@@ -12,7 +12,7 @@ class GAAuthClient {
 	// 2) timeouts and locking
 	
 	// io think this function should now "work" more or less as is
-	function sendReceiveTcp($message_type, $message) {
+	function sendReceive($message_type, $message) {
 		// yeah... this is totally gunna work
 		global $TCP_PORT_NUMBER;
 		
@@ -29,7 +29,7 @@ class GAAuthClient {
 		$datacomp = base64_encode(serialize($msg));
 		$tosend = "AC:$datacomp:EOD";
 		
-		socket_send($socket, $tosend, strlen($tosend));
+		socket_send($socket, $tosend, strlen($tosend), 0);
 		
 		// get up to one meg of data - this is bad... i can feel this function
 		// hurting alot
@@ -41,7 +41,7 @@ class GAAuthClient {
 		while($continue) {
 			$size = socket_recv($socket, $recvd_a, 1024, 0);
 			$recvd .= $recvd_a;
-			if(preg_match("/.*\:EOD$/", $recvd) {
+			if(preg_match("/.*\:EOD$/", $recvd)) {
 				// we have a full string... break out
 				$continue = false;
 				break;
@@ -69,28 +69,6 @@ class GAAuthClient {
 		socket_close($socket);
 		
 		return $component["data"];
-	}
-	
-	function sendReceive($message_type, $message) {
-		global $MSG_QUEUE_KEY_ID_SERVER, $MSG_QUEUE_KEY_ID_CLIENT;
-		
-		
-		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_SERVER)) {
-			return false;
-		}
-
-		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_CLIENT)) {
-			return false;
-		}
-		// TODO we need to setup a client queue sem lock here
-		
-		$cl_queue = msg_get_queue($MSG_QUEUE_KEY_ID_CLIENT);
-		$sr_queue = msg_get_queue($MSG_QUEUE_KEY_ID_SERVER);
-		
-		msg_send($sr_queue, $message_type, $message, true, true, $msg_err);
-		msg_receive($cl_queue, 0, $msg_type, 131072, $msg);
-		
-		return $msg;
 	}
 	
 	function addRadiusClient($clientname, $clientip, $clientsecret, $clientdesc) {

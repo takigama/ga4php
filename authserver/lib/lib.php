@@ -1,10 +1,6 @@
 <?php
 
-if(!isset($MSG_QUEUE_KEY_ID_SERVER)) $MSG_QUEUE_KEY_ID_SERVER = "189751072"; // i would use ftok, but its crap
-if(!isset($MSG_QUEUE_KEY_ID_CLIENT)) $MSG_QUEUE_KEY_ID_CLIENT = "189751073"; // ftok is not ok!
-global $MSG_QUEUE_KEY_ID_SERVER, $MSG_QUEUE_KEY_ID_CLIENT;
-
-if(!isset($TCP_PORT_NUMBER)) $TCP_PORT_NUMBER = 21416;
+if(!isset($TCP_PORT_NUMBER)) $TCP_PORT_NUMBER = 21446;
 global $TCP_PORT_NUMBER;
 
 define("MSG_AUTH_USER_TOKEN", 1);
