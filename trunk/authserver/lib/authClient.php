@@ -3,7 +3,11 @@
 require_once("lib.php");
 
 class GAAuthClient {
-	function addRadiusClient($clientname, $clientip, $clientsecret, $clientdesc) {
+	
+	// this functiuon will now act as our generic send/recieve client funciton
+	// im doing this because im going to move from ipc messaging to a tcp connection
+	// shortly and i want to encapsulate the send/receive behaviour
+	function sendReceive($message_type, $message) {
 		global $MSG_QUEUE_KEY_ID_SERVER, $MSG_QUEUE_KEY_ID_CLIENT;
 		
 		
@@ -19,428 +23,125 @@ class GAAuthClient {
 		$cl_queue = msg_get_queue($MSG_QUEUE_KEY_ID_CLIENT);
 		$sr_queue = msg_get_queue($MSG_QUEUE_KEY_ID_SERVER);
 		
+		msg_send($sr_queue, $message_type, $message, true, true, $msg_err);
+		msg_receive($cl_queue, 0, $msg_type, 131072, $msg);
+		
+		return $msg;
+	}
+	
+	function addRadiusClient($clientname, $clientip, $clientsecret, $clientdesc) {
 	
 		$message["clientname"] = $clientname;
 		$message["clientsecret"] = $clientsecret;
 		$message["clientip"] = $clientip;
 		$message["clientdescription"] = $clientdesc;
 		
-		msg_send($sr_queue, MSG_ADD_RADIUS_CLIENT, $message, true, true, $msg_err);
-		
-		msg_receive($cl_queue, 0, $msg_type, 16384, $msg);
-		return $msg;
+		return $this->sendReceive(MSG_ADD_RADIUS_CLIENT, $message);
 	}
 
 	function deleteRadiusClient($clientname) {
-		global $MSG_QUEUE_KEY_ID_SERVER, $MSG_QUEUE_KEY_ID_CLIENT;
-		
-		
-		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_SERVER)) {
-			return false;
-		}
-
-		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_CLIENT)) {
-			return false;
-		}
-		// TODO we need to setup a client queue sem lock here
-		
-		$cl_queue = msg_get_queue($MSG_QUEUE_KEY_ID_CLIENT);
-		$sr_queue = msg_get_queue($MSG_QUEUE_KEY_ID_SERVER);
-		
-	
 		$message["clientname"] = $clientname;
-		msg_send($sr_queue, MSG_REMOVE_RADIUS_CLIENT, $message, true, true, $msg_err);
 		
-		msg_receive($cl_queue, 0, $msg_type, 16384, $msg);
-		return $msg;
+		return $this->sendReceive(MSG_REMOVE_RADIUS_CLIENT, $message);
+		
 	}
 	
 	function getRadiusClients() {
-		global $MSG_QUEUE_KEY_ID_SERVER, $MSG_QUEUE_KEY_ID_CLIENT;
-		
-		
-		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_SERVER)) {
-			return false;
-		}
-
-		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_CLIENT)) {
-			return false;
-		}
-		// TODO we need to setup a client queue sem lock here
-		
-		$cl_queue = msg_get_queue($MSG_QUEUE_KEY_ID_CLIENT);
-		$sr_queue = msg_get_queue($MSG_QUEUE_KEY_ID_SERVER);
-		
-	
-		msg_send($sr_queue, MSG_GET_RADIUS_CLIENTS, "", true, true, $msg_err);
-		
-		msg_receive($cl_queue, 0, $msg_type, 16384, $msg);
-		return $msg;
+		return $this->sendReceive(MSG_GET_RADIUS_CLIENTS, "");
 	}
 	
 	
 	function syncUserToken($username, $tokenone, $tokentwo) {
-		global $MSG_QUEUE_KEY_ID_SERVER, $MSG_QUEUE_KEY_ID_CLIENT;
-		
-		
-		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_SERVER)) {
-			return false;
-		}
-
-		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_CLIENT)) {
-			return false;
-		}
-		// TODO we need to setup a client queue sem lock here
-		
-		$cl_queue = msg_get_queue($MSG_QUEUE_KEY_ID_CLIENT);
-		$sr_queue = msg_get_queue($MSG_QUEUE_KEY_ID_SERVER);
-		
 		$message["username"] = $username;
 		$message["tokenone"] = $tokenone;
 		$message["tokentwo"] = $tokentwo;
 
-		msg_send($sr_queue, MSG_SYNC_TOKEN, $message, true, true, $msg_err);
-		
-		msg_receive($cl_queue, 0, $msg_type, 16384, $msg);
-		return $msg;
+		return $this->sendReceive(MSG_SYNC_TOKEN, $messgae);
 	}
 	
 	function getUserTokenType($username) {
-		global $MSG_QUEUE_KEY_ID_SERVER, $MSG_QUEUE_KEY_ID_CLIENT;
-		
-		
-		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_SERVER)) {
-			return false;
-		}
-
-		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_CLIENT)) {
-			return false;
-		}
-		// TODO we need to setup a client queue sem lock here
-		
-		$cl_queue = msg_get_queue($MSG_QUEUE_KEY_ID_CLIENT);
-		$sr_queue = msg_get_queue($MSG_QUEUE_KEY_ID_SERVER);
-		
 		$message["username"] = $username;
-		msg_send($sr_queue, MSG_GET_TOKEN_TYPE, $message, true, true, $msg_err);
-		
-		msg_receive($cl_queue, 0, $msg_type, 16384, $msg);
-		return $msg;		
+
+		return $this->sendReceive(MSG_GET_TOKEN_TYPE, $message);		
 	}
 	
 	function setUserToken($username, $token) {
-		global $MSG_QUEUE_KEY_ID_SERVER, $MSG_QUEUE_KEY_ID_CLIENT;
-		
-		
-		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_SERVER)) {
-			return false;
-		}
-
-		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_CLIENT)) {
-			return false;
-		}
-		// TODO we need to setup a client queue sem lock here
-		
-		$cl_queue = msg_get_queue($MSG_QUEUE_KEY_ID_CLIENT);
-		$sr_queue = msg_get_queue($MSG_QUEUE_KEY_ID_SERVER);
-		
 		$message["username"] = $username;
 		$message["tokenstring"] = $token;
 		
-		msg_send($sr_queue, MSG_SET_USER_TOKEN, $message, true, true, $msg_err);
-		
-		msg_receive($cl_queue, 0, $msg_type, 16384, $msg);
-		return $msg;		
+		return $this->sendReceive(MSG_GET_USER_TOKEN, $message);		
 	}
 	
 	function setUserPass($username, $password) {
-		global $MSG_QUEUE_KEY_ID_SERVER, $MSG_QUEUE_KEY_ID_CLIENT;
-		
-		
-		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_SERVER)) {
-			return false;
-		}
-
-		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_CLIENT)) {
-			return false;
-		}
-		// TODO we need to setup a client queue sem lock here
-		
-		$cl_queue = msg_get_queue($MSG_QUEUE_KEY_ID_CLIENT);
-		$sr_queue = msg_get_queue($MSG_QUEUE_KEY_ID_SERVER);
-
 		$message["username"] = $username;
 		$message["password"] = $password;
 		
-		msg_send($sr_queue, MSG_SET_USER_PASSWORD, $message, true, true, $msg_err);
-		
-		msg_receive($cl_queue, 0, $msg_type, 16384, $msg);
-
-		return $msg;
+		return $this->sendReceive(MSG_SET_USER_PASSWORD, $message);
 	}
 	
 	function getOtkID($username) {
-		global $MSG_QUEUE_KEY_ID_SERVER, $MSG_QUEUE_KEY_ID_CLIENT;
-		
-		
-		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_SERVER)) {
-			return false;
-		}
-
-		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_CLIENT)) {
-			return false;
-		}
-		// TODO we need to setup a client queue sem lock here
-		
-		$cl_queue = msg_get_queue($MSG_QUEUE_KEY_ID_CLIENT);
-		$sr_queue = msg_get_queue($MSG_QUEUE_KEY_ID_SERVER);
-
 		$message["username"] = $username;
-		msg_send($sr_queue, MSG_GET_OTK_ID, $message, true, true, $msg_err);
-		
-		msg_receive($cl_queue, 0, $msg_type, 16384, $msg);
-		
-		return $msg;
-		
+
+		return $this->sendReceive(MSG_GET_OTK_ID, $message);
 	}
 	
 	function getOtkPng($username, $otk) {
-		global $MSG_QUEUE_KEY_ID_SERVER, $MSG_QUEUE_KEY_ID_CLIENT;
-		
-		
-		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_SERVER)) {
-			return false;
-		}
-
-		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_CLIENT)) {
-			return false;
-		}
-		// TODO we need to setup a client queue sem lock here
-		
-		$cl_queue = msg_get_queue($MSG_QUEUE_KEY_ID_CLIENT);
-		$sr_queue = msg_get_queue($MSG_QUEUE_KEY_ID_SERVER);
-
 		$message["otk"] = $otk;
 		$message["username"] = $username;
-		error_log("sending message, $otk");
-		msg_send($sr_queue, MSG_GET_OTK_PNG, $message, true, true, $msg_err);
-		
-		msg_receive($cl_queue, 0, $msg_type, 16384, $msg);
-		
-		return $msg;
-		
+
+		return $this->sendReceive(MSG_GET_OTK_PNG, $message);
 	}
 	
 	function authUserPass($username, $password) {
-		global $MSG_QUEUE_KEY_ID_SERVER, $MSG_QUEUE_KEY_ID_CLIENT;
-		
-		
-		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_SERVER)) {
-			return false;
-		}
-
-		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_CLIENT)) {
-			return false;
-		}
-		// TODO we need to setup a client queue sem lock here
-		
-		$cl_queue = msg_get_queue($MSG_QUEUE_KEY_ID_CLIENT);
-		$sr_queue = msg_get_queue($MSG_QUEUE_KEY_ID_SERVER);
-
 		$message["username"] = $username;
 		$message["password"] = $password;
 		
-		msg_send($sr_queue, MSG_AUTH_USER_PASSWORD, $message, true, true, $msg_err);
-		
-		msg_receive($cl_queue, 0, $msg_type, 16384, $msg);
-		return $msg;		
+		return $this->sendReceive(MSG_AUTH_USER_PASSWORD, $message);		
 	}
 	
 	function deleteUser($username) {
-		global $MSG_QUEUE_KEY_ID_SERVER, $MSG_QUEUE_KEY_ID_CLIENT;
-		
-		
-		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_SERVER)) {
-			return false;
-		}
-
-		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_CLIENT)) {
-			return false;
-		}
-		// TODO we need to setup a client queue sem lock here
-		
-		$cl_queue = msg_get_queue($MSG_QUEUE_KEY_ID_CLIENT);
-		$sr_queue = msg_get_queue($MSG_QUEUE_KEY_ID_SERVER);
-
 		$message["username"] = $username;
 		
-		msg_send($sr_queue, MSG_DELETE_USER, $message, true, true, $msg_err);
-		
-		msg_receive($cl_queue, 0, $msg_type, 16384, $msg);
-		
-		return $msg;
-		
+		return $this->sendReceive(MSG_DELETE_USER, $message);
 	}
 	
 	function setUserRealName($username, $realname) {
-		global $MSG_QUEUE_KEY_ID_SERVER, $MSG_QUEUE_KEY_ID_CLIENT;
-		
-		
-		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_SERVER)) {
-			return false;
-		}
-
-		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_CLIENT)) {
-			return false;
-		}
-		// TODO we need to setup a client queue sem lock here
-		
-		$cl_queue = msg_get_queue($MSG_QUEUE_KEY_ID_CLIENT);
-		$sr_queue = msg_get_queue($MSG_QUEUE_KEY_ID_SERVER);
-
 		$message["username"] = $username;
 		$message["realname"] = $realname;
 		
-		msg_send($sr_queue, MSG_SET_USER_REALNAME, $message, true, true, $msg_err);
-		
-		msg_receive($cl_queue, 0, $msg_type, 16384, $msg);
-		return $msg;		
+		return $this->sendReceive(MSG_SET_USER_REALNAME, $message);		
 	}
 	
 	function getUsers() {
-		global $MSG_QUEUE_KEY_ID_SERVER, $MSG_QUEUE_KEY_ID_CLIENT;
-		
-		
-		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_SERVER)) {
-			return false;
-		}
-
-		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_CLIENT)) {
-			return false;
-		}
-		// TODO we need to setup a client queue sem lock here
-		
-		$cl_queue = msg_get_queue($MSG_QUEUE_KEY_ID_CLIENT);
-		$sr_queue = msg_get_queue($MSG_QUEUE_KEY_ID_SERVER);
-		
-		msg_send($sr_queue, MSG_GET_USERS, "", true, true, $msg_err);
-		
-		msg_receive($cl_queue, 0, $msg_type, 524288, $msg);
-		
-		return $msg;
+		return $this->sendReceive(MSG_GET_USERS, "");
 	}
 	
 	function authUserToken($username, $passcode) {
-		global $MSG_QUEUE_KEY_ID_SERVER, $MSG_QUEUE_KEY_ID_CLIENT;
-		
-		
-		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_SERVER)) {
-			return false;
-		}
-
-		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_CLIENT)) {
-			return false;
-		}
-		// TODO we need to setup a client queue sem lock here
-		
-		$cl_queue = msg_get_queue($MSG_QUEUE_KEY_ID_CLIENT);
-		$sr_queue = msg_get_queue($MSG_QUEUE_KEY_ID_SERVER);
-		
-		
 		$message["username"] = $username;
 		$message["passcode"] = $passcode;
 		
-		msg_send($sr_queue, MSG_AUTH_USER_TOKEN, $message, true, true, $msg_err);
-		
-		msg_receive($cl_queue, 0, $msg_type, 16384, $msg);
-		
-		return $msg;
+		return $this->sendReceive(MSG_AUTH_USER_TOKEN, $message);
 	}
 	
 	function deleteUserToken($username) {
-		
-		global $MSG_QUEUE_KEY_ID_SERVER, $MSG_QUEUE_KEY_ID_CLIENT;
-		
-		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_SERVER)) {
-			return false;
-		}
-
-		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_CLIENT)) {
-			return false;
-		}
-		
-		// TODO we need to setup a client queue sem lock here
-		
-		$cl_queue = msg_get_queue($MSG_QUEUE_KEY_ID_CLIENT);
-		$sr_queue = msg_get_queue($MSG_QUEUE_KEY_ID_SERVER);
-		
-		
 		$message["username"] = $username;
 		
-		msg_send($sr_queue, MSG_DELETE_USER_TOKEN, $message, true, true, $msg_err);
-		
-		msg_receive($cl_queue, 0, $msg_type, 16384, $msg);
-		
-		return $msg;
+		return $this->sendReceive(MSG_DELETE_USER_TOKEN, $message);
 	}
 	
 	function addUser($username, $tokentype="", $hexkey="") {
-		global $MSG_QUEUE_KEY_ID_SERVER, $MSG_QUEUE_KEY_ID_CLIENT;
-		
-		
-		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_SERVER)) {
-			return false;
-		}
-
-		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_CLIENT)) {
-			return false;
-		}
-		
-		// TODO we need to setup a client queue sem lock here
-		
-		$cl_queue = msg_get_queue($MSG_QUEUE_KEY_ID_CLIENT);
-		$sr_queue = msg_get_queue($MSG_QUEUE_KEY_ID_SERVER);
-		
-		
 		$message["username"] = $username;
 		if($tokentype!="") $message["tokentype"] = $tokentype;
 		if($hexkey!="") $message["hexkey"] = $hexkey;
 		
-		msg_send($sr_queue, MSG_ADD_USER_TOKEN, $message, true, true, $msg_err);
-		
-		msg_receive($cl_queue, 0, $msg_type, 16384, $msg);
-		
-		return $msg;
+		return $this->sendReceive(MSG_ADD_USER_TOKEN, $message);
 	}
 
 	function setUserTokenType($username, $tokentype) {
-		global $MSG_QUEUE_KEY_ID_SERVER, $MSG_QUEUE_KEY_ID_CLIENT;
-		
-		
-		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_SERVER)) {
-			return false;
-		}
-
-		if(!msg_queue_exists($MSG_QUEUE_KEY_ID_CLIENT)) {
-			return false;
-		}
-		
-		// TODO we need to setup a client queue sem lock here
-		
-		$cl_queue = msg_get_queue($MSG_QUEUE_KEY_ID_CLIENT);
-		$sr_queue = msg_get_queue($MSG_QUEUE_KEY_ID_SERVER);
-		
-		
-		
 		$message["username"] = $username;
 		$message["tokentype"] = $tokentype;
 		
-		msg_send($sr_queue, MSG_SET_USER_TOKEN_TYPE, $message, true, true, $msg_err);
-		
-		msg_receive($cl_queue, 0, $msg_type, 16384, $msg);
-		
-		return $msg;
-		
+		return $this->sendReceive(MSG_SET_USER_TOKEN_TYPE, $message);
 	}
 }
 
