@@ -20,6 +20,7 @@ GA4PHP will (hopefully) be a fully fledged authentication system that is easy to
 
 
 = Upcoming Features =
+  # the no 1 feature im going to work on now is making the auth server installable via the script
   # enumerate the errors from ga4php class and authclient
   # syslog for authd
   # re-write the authd/authclient from scratch in a non-braindead way
