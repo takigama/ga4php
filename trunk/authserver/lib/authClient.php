@@ -7,6 +7,9 @@ class GAAuthClient {
 	// this functiuon will now act as our generic send/recieve client funciton
 	// im doing this because im going to move from ipc messaging to a tcp connection
 	// shortly and i want to encapsulate the send/receive behaviour
+	// things we need to add here are:
+	// 1) a way of saying "more data coming" cause getusers wont fit into one message
+	// 2) timeouts and locking
 	function sendReceive($message_type, $message) {
 		global $MSG_QUEUE_KEY_ID_SERVER, $MSG_QUEUE_KEY_ID_CLIENT;
 		
