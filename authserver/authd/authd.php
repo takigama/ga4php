@@ -10,6 +10,8 @@ require_once("../lib/lib.php");
 //exit(0);
 // first we want to fork into the background like all good daemons should
 //$pid = pcntl_fork();
+
+// uncomment this bit and comment the fork above to stop it going into the background
 $pid = 0;
 
 if($pid == -1) {
@@ -19,6 +21,14 @@ if($pid == -1) {
 	echo "i am a parent, i leave\n";
 	exit(0);
 } else {
+	// here is where i need to swithc to TCP network protocol stuff
+	// i must bind 127.0.0.1 though.
+	// what i want to happen is this:
+	// 1) server receives connection
+	// 2) server forks off process to process connection
+	// 3) main server continues.
+	// a forked process thingy should be fully self contained and capable of dealing
+	// with "problems", i.e. the parent doesnt want to have to clean up children
 	global $MSG_QUEUE_KEY_ID_SERVER, $MSG_QUEUE_KEY_ID_CLIENT;
 	
 	$cl_queue = msg_get_queue($MSG_QUEUE_KEY_ID_CLIENT, 0666 | 'IPC_CREAT');
