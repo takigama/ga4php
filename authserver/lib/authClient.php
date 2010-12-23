@@ -10,6 +10,67 @@ class GAAuthClient {
 	// things we need to add here are:
 	// 1) a way of saying "more data coming" cause getusers wont fit into one message
 	// 2) timeouts and locking
+	
+	// io think this function should now "work" more or less as is
+	function sendReceiveTcp($message_type, $message) {
+		// yeah... this is totally gunna work
+		global $TCP_PORT_NUMBER;
+		
+		$socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+		$res = socket_connect($socket, "127.0.0.1", $TCP_PORT_NUMBER);
+		if(!$res) {
+			socket_close($socket);
+			return false;
+		}
+		
+		$msg["type"] = $message_type;
+		$msg["data"] = $message;
+		
+		$datacomp = base64_encode(serialize($msg));
+		$tosend = "AC:$datacomp:EOD";
+		
+		socket_send($socket, $tosend, strlen($tosend));
+		
+		// get up to one meg of data - this is bad... i can feel this function
+		// hurting alot
+		// TODO FIX THIS - its garbage code... im not really sure how to handle this really
+		// we need to read back as AS:data:EOD - i think it now does.. i hope, tho we need
+		// timeouts now.
+		$recvd = "";
+		$continue = true;
+		while($continue) {
+			$size = socket_recv($socket, $recvd_a, 1024, 0);
+			$recvd .= $recvd_a;
+			if(preg_match("/.*\:EOD$/", $recvd) {
+				// we have a full string... break out
+				$continue = false;
+				break;
+			}
+		}
+		
+		
+		// first check we got something that makes sense
+		if(preg_match("/^AS:.*:EOD/", $recvd) < 1) {
+			socket_close($socket);
+			// we have a problem jim
+			return false;
+		}
+		
+		$xps = explode(":", $recvd);
+		
+		$component =  unserialize(base64_decode($xps[1]));
+		
+		if($component["type"] != $message_type) {
+			// we have a problem jim
+			socket_close($socket);
+			return false;
+		}
+		
+		socket_close($socket);
+		
+		return $component["data"];
+	}
+	
 	function sendReceive($message_type, $message) {
 		global $MSG_QUEUE_KEY_ID_SERVER, $MSG_QUEUE_KEY_ID_CLIENT;
 		
