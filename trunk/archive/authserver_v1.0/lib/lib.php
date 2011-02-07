@@ -87,6 +87,8 @@ function getDatabase()
 		$dbobject->query($sql);
 		$sql = 'CREATE TABLE "radclients" ("rad_id" INTEGER PRIMARY KEY AUTOINCREMENT,"rad_name" TEXT, "rad_ip" TEXT, "rad_secret" TEXT, "rad_desc" TEXT);';
 		$dbobject->query($sql);
+		$sql = 'CREATE TABLE "hardwaretokens" ("tok_id" INTEGER PRIMARY KEY AUTOINCREMENT,"tok_name" TEXT, "tok_key" TEXT, "tok_type" TEXT);';
+		$dbobject->query($sql);
 	}
 	
 	return $dbobject;
