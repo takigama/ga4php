@@ -107,7 +107,12 @@ switch($argv[1]) {
 		break;
 	case "add":
 		$return = $myAC->addUser($argv[2]);
-		echo "Created user, ".$argv[2]." returned $return\n";
+		if($return) {
+			echo "Created user, ".$argv[2]."\n";
+		} else {
+			echo "Failed to create user, ".$argv[2]."\n";
+		}
+		 
 		break;
 	case "delete":
 		$res = $myAC->deleteUser($argv[2]);
