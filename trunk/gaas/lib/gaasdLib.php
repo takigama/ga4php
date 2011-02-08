@@ -1,13 +1,10 @@
 <?php 
 
-// first include the ga4php.php file itself
-$BASE_DIR = realpath(dirname(__FILE__)."/../../");
-global $BASE_DIR;
+require_once("globalLib.php");
+require_once("gaasdMessages.php");
 
 // messy
 require_once(dirname(__FILE__)."/../../lib/ga4php.php");
-
-
 
 // first we check if our db exists, if not, we're not inited
 $initState = false;
