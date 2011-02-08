@@ -32,6 +32,9 @@ function gaasInitServer_server($msg)
 	// IN expects
 	// $m["user"] = "someuser";
 	// $m["pass"] = "somepass";
+	if($initState != "init") {
+		return false;
+	}
 	
 	if($msg["backend"] == "AD") {
 		$backEnd = "AD";
@@ -63,8 +66,21 @@ function gaasInitServer_server($msg)
 		// this ones simpler
 		$backEnd = "IN";
 		createDB();
+		
+		// create the user in the db
+		$username = $msg["user"];
+		$password = $msg["pass"];
+		
+		$myga = new gaasdGA();
+		$myga->setUser($username);
+		
+		if($password == "") $pass = "";
+		else $pass = hash('sha512', $password);
+		
+		$db = getDB();
+		$db->query($sql = "update users set users_password='$pass' where users_username='$username'");
+		
 		$initState = "running";
-		// then we need to "create user";
 		return true;
 	} else {
 		return false;

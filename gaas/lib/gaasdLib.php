@@ -12,7 +12,7 @@ $backEnd = "";
 global $initState, $backEnd;
 if(file_exists($BASE_DIR."/gaas/gaasd/gaasd.sqlite")) {
 	// then we check if the config vars we need exist in the db
-	$backEndType = confGetVar("backend");
+	$backEndType = confGetVal("backend");
 	
 	if($backEndType == "AD") {
 		$backEnd = "AD";
@@ -94,7 +94,7 @@ function confDelVar($varname)
 }
 
 // a funciton to deal with Config Vars
-function confGetVar($varname)
+function confGetVal($varname)
 {
 	$db = getDB();
 	
@@ -114,7 +114,7 @@ function confGetVar($varname)
 }
 
 // and a function to put vars
-function confPutVar($varname, $value)
+function confSetVal($varname, $value)
 {
 	$db = getDB();
 	
@@ -129,21 +129,87 @@ function confPutVar($varname, $value)
 }
 
 // now we define our extended class
-class gaasGA extends GoogleAuthenticator
+class gaasdGA extends GoogleAuthenticator
 {
 	
-	function getData($username)
-	{
+	function getData($username) {
+		//echo "called into getdata\n";
+		
+		// get our database connection
+		$dbObject = getDB();
+		
+		// set the sql for retreiving the data
+		$sql = "select users_tokendata from users where users_username='$username'";
+		
+		// run the query
+		$result = $dbObject->query($sql);
+		
+		// check the result
+		//echo "next1\n";
+		if(!$result) return false;
+		
+		// now just retreieve all the data (there should only be one, but whatever)
+		//echo "next2\n";
+		$tokendata = false;
+		foreach($result as $row) {
+			$tokendata = $row["users_tokendata"];
+		}
+
+		//echo "next3, $username, $tokendata\n";
+		// now we have our data, we just return it. If we got no data
+		// we'll just return false by default
+		return $tokendata;
+		
+		// and there you have it, simple eh?
 	}
 	
 	
-	function putData($username, $data)
-	{
+	function putData($username, $data) {
+		// get our database connection
+		$dbObject = getDB();
+		
+		// we need to check if the user exists, and if so put the data, if not create the data
+		$sql = "select * from users where users_username='$username'";
+		$res = $dbObject->query($sql);
+		if($res->fetchColumn() > 0) {
+			// do update
+			//error_log("doing userdata update");
+			$sql = "update users set users_tokendata='$data' where users_username='$username'";
+		} else {
+			// do insert
+			//error_log("doing user data create");
+			$sql = "insert into users values (NULL, '$username', '', '', '$data', '')";
+		}
+		
+		if($dbObject->query($sql)) {
+			return true;
+		} else {
+			return false;
+		}
+
 	}
 	
-	
-	function getUsers()
-	{
+	function getUsers() {
+		// get our database connection
+		$dbObject = getDB();
+		
+		// now the sql again
+		$sql = "select users_username from users";
+		
+		// run the query
+		$result = $dbObject->query($sql);
+		
+		// iterate over the results - we expect a simple array containing
+		// a list of usernames
+		$i = 0;
+		$users = array();
+		foreach($result as $row) {
+			$users[$i] = $row["username"];
+			$i++;
+		}
+		
+		// now return the list
+		return $users;
 	}
 }
 ?>
