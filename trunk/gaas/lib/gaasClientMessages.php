@@ -8,8 +8,7 @@ function gaasStatus_clientsend($params)
 
 function gaasStatus_clientrecv($params)
 {
-	print_r($params);
-	echo "Server status is $params\n";
+	return $params;
 }
 
 
@@ -22,6 +21,7 @@ function gaasInitServer_clientsend($params)
 	$msg["backend"] = $params[0];
 	$msg["user"] = $params[1];
 	$msg["pass"] = $params[2];
+	
 	if($msg["backend"] == "AD") {
 		$msg["domain"] = $params[3];
 		$msg["clientdef"] = $params[4];
