@@ -37,6 +37,20 @@ abstract class GoogleAuthenticator {
 		return $data;
 	}
 	
+	// custom data field manipulation bits
+	function setCustomData($username, $data) {
+		$data = $this->internalGetData($username);
+		$data["user"] = $key;
+		$this->internalPutData($username, $data);
+	}
+	
+	function getCustomData($username) {
+		$data = $this->internalGetData($username);
+		$custom = $data["user"];
+		return $custom;
+		
+	}
+	
 	// an internal funciton to get data from the overloaded functions
 	// and turn them into php arrays.
 	function internalGetData($username) {
@@ -124,6 +138,8 @@ abstract class GoogleAuthenticator {
 		// oh, we need to figure out how to do thi?
 		$this->internalPutData($username, "");		
 	}
+	
+
 	
 	// user has input their user name and some code, authenticate
 	// it
