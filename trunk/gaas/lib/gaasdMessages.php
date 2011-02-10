@@ -45,6 +45,9 @@ function gaasInitServer_server($msg)
 	}
 	
 	if($msg["backend"] == "AD") {
+		echo "Backend is AD with params of\n";
+		print_r($msg);
+		echo "\n";
 		$backEnd = "AD";
 		// attempt connect to AD, verify creds
 		$addom = $msg["domain"];
@@ -83,6 +86,7 @@ function gaasInitServer_server($msg)
 		$backEnd = "AD";
 		
 		// and that should be it... i think cept im in a forked erg.. lets assume it works, need pain i do not.
+		echo "its all good at the server\n";
 		
 		return true;
 	} else if($msg["backend"] == "IN") {

@@ -51,6 +51,7 @@ class GAASClient {
 		// first check we got something that makes sense
 		if(preg_match("/^AS:.*:EOD/", $recvd) < 1) {
 			socket_close($socket);
+			echo "Returned data is not in right format\n";
 			// we have a problem jim
 			return false;
 		}
@@ -60,10 +61,14 @@ class GAASClient {
 		$component =  unserialize(base64_decode($xps[1]));
 		
 		if($component["type"] != $message_type) {
+			echo "Message type was not the same as original message\n";
 			// we have a problem jim
 			socket_close($socket);
 			return false;
 		}
+		
+		//echo "component\n";
+		//print_r($component);
 		
 		socket_close($socket);
 		
@@ -85,7 +90,7 @@ class GAASClient {
 		//echo "real function is $function_send, $function_recv\n";
 		
 		if(function_exists($function_send) && function_exists($function_recv)) {
-			$function_recv($this->sendReceive($st_defined, $function_send($params)));
+			return $function_recv($this->sendReceive($st_defined, $function_send($params)));
 		} else {
 			error_log("Function, $function does not exist!");
 		}
