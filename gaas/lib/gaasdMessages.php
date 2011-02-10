@@ -21,6 +21,7 @@ function gaasInitServer_server($msg)
 {
 	global $initState, $backEnd;
 	
+	error_log("Init server called\n");
 	// here we "init" the server, if we're ad, we attempt to connect to AD and if it all works
 	// we then create the db
 	// $m["backend"] = "AD|IN";
@@ -32,7 +33,14 @@ function gaasInitServer_server($msg)
 	// IN expects
 	// $m["user"] = "someuser";
 	// $m["pass"] = "somepass";
-	if($initState != "init") {
+	echo "initstate is $initState\n";
+	if($initState) {
+		echo "true\n";
+	} else {
+		echo "false\n";
+	}
+	if($initState) {
+		error_log("init server called when server already init'd\n");
 		return false;
 	}
 	
@@ -53,9 +61,13 @@ function gaasInitServer_server($msg)
 		}
 		
 		// we should check all servers, but lets just go with 0 for now
-		$cnt = ldap_connect($servers[0]["target"], $servers[0]["port"]);
-		ldap_bind($cnt, "$adlogin", "$adpass");
-		
+		$res =  adTestLogin($addom, $adlogin, $adpass);
+		if(!$res) {
+			echo "AD login test failed\n";
+			return false;
+		} else {
+			echo "AD login test succeeded\n";
+		}
 		
 		
 		// then
@@ -67,7 +79,7 @@ function gaasInitServer_server($msg)
 		confSetVal("ad.clientdef", $adclientdef);
 		confSetVal("ad.admindef", $adadmindef);
 		
-		$initState = "running";
+		$initState = true;
 		$backEnd = "AD";
 		
 		// and that should be it... i think cept im in a forked erg.. lets assume it works, need pain i do not.
@@ -96,5 +108,39 @@ function gaasInitServer_server($msg)
 	} else {
 		return false;
 	}
+}
+
+
+function gaasSetADLogin_server($msg)
+{
+	global $initState, $backEnd;
+	
+	if($initState != "running") {
+		return "not in running init state";
+	}
+	
+	if($backEnd != "AD") {
+		return "not setup as AD client";
+	}
+	
+	$addom = $msg["domain"];
+	$adlogin = $msg["user"];
+	$adpass = $msg["pass"];
+	$adclientdef = $msg["clientdef"];
+	$adadmindef = $msg["admindef"];
+	
+	$res = adTestLogin($addmo, $adlogin, $adpass);
+	if($res != 0) {
+		return "not able to connect to AD with given cred's";
+	}
+	
+	confSetVal("ad.domain", $addom);
+	confSetVal("ad.user", $adlogin);
+	confSetVal("ad.pass", $adpass);
+	confSetVal("ad.clientdef", $adclientdef);
+	confSetVal("ad.admindef", $adadmindef);
+	
+	return true;
+	
 }
 ?>
