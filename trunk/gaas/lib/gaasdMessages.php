@@ -44,7 +44,18 @@ function gaasInitServer_server($msg)
 		$adpass = $msg["pass"];
 		$adclientdef = $msg["clientdef"];
 		$adadmindef = $msg["admindef"];
+		
 		// now wee test our logins...
+		// first look up the domain name stuff
+		$servers = dns_get_record("_gc._tcp.$addom");
+		if(count($servers)<1) {
+			echo "AD servers cant be found, fail!\n";
+		}
+		
+		// we should check all servers, but lets just go with 0 for now
+		$cnt = ldap_connect($servers[0]["target"], $servers[0]["port"]);
+		ldap_bind($cnt, "$adlogin", "$adpass");
+		
 		
 		
 		// then
