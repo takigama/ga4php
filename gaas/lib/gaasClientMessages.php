@@ -44,6 +44,7 @@ function gaasInitServer_clientrecv($params)
 {
 	echo "in recv, params\n";
 	print_r($params);
+	echo "\n";
 	return $params;
 }
 
