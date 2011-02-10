@@ -33,7 +33,7 @@ function gaasInitServer_server($msg)
 	// IN expects
 	// $m["user"] = "someuser";
 	// $m["pass"] = "somepass";
-	echo "initstate is $initState\n";
+	echo "initstate is $initState";
 	if($initState) {
 		echo "true\n";
 	} else {
@@ -45,9 +45,6 @@ function gaasInitServer_server($msg)
 	}
 	
 	if($msg["backend"] == "AD") {
-		echo "Backend is AD with params of\n";
-		print_r($msg);
-		echo "\n";
 		$backEnd = "AD";
 		// attempt connect to AD, verify creds
 		$addom = $msg["domain"];
@@ -66,10 +63,7 @@ function gaasInitServer_server($msg)
 		// we should check all servers, but lets just go with 0 for now
 		$res =  adTestLogin($addom, $adlogin, $adpass);
 		if(!$res) {
-			echo "AD login test failed\n";
 			return false;
-		} else {
-			echo "AD login test succeeded\n";
 		}
 		
 		
@@ -81,13 +75,12 @@ function gaasInitServer_server($msg)
 		confSetVal("ad.encryptionkey", generateHexString(32));
 		confSetVal("ad.clientdef", $adclientdef);
 		confSetVal("ad.admindef", $adadmindef);
+		confSetVal("backend", "AD");
 		
 		$initState = true;
 		$backEnd = "AD";
 		
 		// and that should be it... i think cept im in a forked erg.. lets assume it works, need pain i do not.
-		echo "its all good at the server\n";
-		
 		return true;
 	} else if($msg["backend"] == "IN") {
 		// this ones simpler

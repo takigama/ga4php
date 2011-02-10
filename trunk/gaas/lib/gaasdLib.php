@@ -14,7 +14,10 @@ if(file_exists($BASE_DIR."/gaas/gaasd/gaasd.sqlite")) {
 	// then we check if the config vars we need exist in the db
 	$backEndType = confGetVal("backend");
 	
+	echo "backend type is $backEndType\n";
+	
 	if($backEndType == "AD") {
+		echo "init state should be true\n";
 		$backEnd = "AD";
 		
 		// TODO: we should now check all vars are set, but for now this will surfice

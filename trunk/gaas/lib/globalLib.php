@@ -43,10 +43,10 @@ function adTestLogin($domain, $user, $password)
 	echo "Connected\n";
 	$bind = ldap_bind($cnt, "$user@$domain", "$password");
 	if($bind) {
-		echo "bind is true $user@$domain $password\n";
+		echo "login has succeeded\n";
 		return true;
 	} else {
-		echo "bind is false $user@$domain $password\n";
+		echo "login has failed\n";
 		return false;
 	}	
 }
