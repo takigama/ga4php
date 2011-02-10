@@ -18,9 +18,6 @@ function gaasStatus_clientrecv($params)
 // IN: "IN", "user", "pass"
 function gaasInitServer_clientsend($params)
 {
-	echo "backend:\n";
-	print_r($params);
-	echo "\n";
 	$msg["backend"] = $params[0];
 	$msg["user"] = $params[1];
 	$msg["pass"] = $params[2];
@@ -42,9 +39,6 @@ function gaasInitServer_clientsend($params)
 // pretty simple, it either works or doesnt, we just pass on the result
 function gaasInitServer_clientrecv($params)
 {
-	echo "in recv, params\n";
-	print_r($params);
-	echo "\n";
 	return $params;
 }
 

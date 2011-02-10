@@ -67,9 +67,6 @@ class GAASClient {
 			return false;
 		}
 		
-		//echo "component\n";
-		//print_r($component);
-		
 		socket_close($socket);
 		
 		return $component["data"];

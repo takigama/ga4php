@@ -26,9 +26,6 @@ switch($argv[1]) {
 			if($argc < 7) usage();
 		}
 		$ret = $myga->MSG_INIT_SERVER("AD", $argv[3], $argv[4], $argv[5], $argv[6], $argv[7]);
-		echo "Ret:\n";
-		print_r($ret);
-		echo "\n";
 		if($ret) {
 			echo "initialising server succeeded\n";
 		} else {
