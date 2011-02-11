@@ -152,14 +152,18 @@ function gaasSetADLogin_server($msg)
 
 function gaasSetAdminGroup_server($msg)
 {
-	confSetVal("ad.admindef", $msg["admingroup"]);
+	if(confGetVal("backend") == "AD") {
+		confSetVal("ad.admindef", $msg["admingroup"]);
+	} else return false;
 	
 	return true;
 }
 
 function gaasSetClientGroup_server($msg)
 {
-	confSetVal("ad.clientdef", $msg["clientgroup"]);
+	if(confGetVal("backend") == "AD") {
+		confSetVal("ad.clientdef", $msg["clientgroup"]);
+	} else return false;
 	
 	return true;
 }
@@ -168,7 +172,11 @@ function gaasProvisionUser_server($msg)
 {
 	
 	// function userInGroup($user, $domain, $adlogin, $adpass, $group)
-	userInGroup($msg["username"], confGetVal("ad.domain"), confGetVal("ad.user", $adlogin), confGetVal("ad.pass"), confGetVal("ad.clientdef"));
+	if(confGetVal("backend") == "AD") {
+		userInGroup($msg["username"], confGetVal("ad.domain"), confGetVal("ad.user", $adlogin), confGetVal("ad.pass"), confGetVal("ad.clientdef"));
+	} else {
+		// internal db
+	}
 	
 	
 	return true;
