@@ -11,7 +11,20 @@ function gaasStatus_server($messages)
 	$return = "init";
 	if($initState != false && $backEnd != "") {
 		$return = "running";
+		$be = confGetVal("backend");
+		if($be == "AD") {
+			$dom = confGetVal("ad.domain");
+			$user = confGetVal("ad.user");
+			$client = confGetVal("ad.clientdef");
+			$admin = confGetVal("ad.admindef");
+			$return .= " - AD integrated to $dom, GAASD Username: $user, Clients Group: $client, Admins Group: $admin";		
+		} else {
+			$return .= " - internal database";
+		}
+		
 	}
+	
+	
 	
 	return $return;
 }
@@ -147,6 +160,16 @@ function gaasSetAdminGroup_server($msg)
 function gaasSetClientGroup_server($msg)
 {
 	confSetVal("ad.clientdef", $msg["clientgroup"]);
+	
+	return true;
+}
+
+function gaasProvisionUser_server($msg)
+{
+	
+	// function userInGroup($user, $domain, $adlogin, $adpass, $group)
+	userInGroup($msg["username"], confGetVal("ad.domain"), confGetVal("ad.user", $adlogin), confGetVal("ad.pass"), confGetVal("ad.clientdef"));
+	
 	
 	return true;
 }

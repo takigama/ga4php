@@ -37,6 +37,10 @@ function gaasInitServer_clientsend($params)
 }
 
 // pretty simple, it either works or doesnt, we just pass on the result
+// im leaving this function here as an example of how you deal
+// with data coming back from the server but prior to returning
+// to the client. if it just returns the data back to the client
+// you doing have to define a recving function
 function gaasInitServer_clientrecv($params)
 {
 	return $params;
@@ -51,20 +55,10 @@ function gaasSetADLogin_clientsend($params)
 	return $msg;
 }
 
-function gaasSetADLogin_clientrecv($params)
-{
-	return $params;
-}
-
 function gaasSetClientGroup_clientsend($params)
 {
 	$msg["clientgroup"] = $params[0];
 	return $msg;
-}
-
-function gaasSetClientGroup_clientrecv($params)
-{
-	return $params;
 }
 
 function gaasSetAdminGroup_clientsend($params)
@@ -73,9 +67,10 @@ function gaasSetAdminGroup_clientsend($params)
 	return $msg;
 }
 
-function gaasSetAdminGroup_clientrecv($params)
+function gaasProvisionUser_clientsend($params)
 {
-	return $params;
+	$msg["username"] = $params[0];
+	return $msg;
 }
 
 ?>
