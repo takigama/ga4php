@@ -3,7 +3,7 @@
 // thie file defines the messages sent too and from the gaas client.
 function gaasStatus_clientsend($params)
 {
-	return $params[0];
+	return $params;
 }
 
 function gaasStatus_clientrecv($params)
@@ -44,11 +44,38 @@ function gaasInitServer_clientrecv($params)
 
 function gaasSetADLogin_clientsend($params)
 {
+	$msg["domain"] = $params[2];
+	$msg["user"] = $params[0];
+	$msg["pass"] = $params[1];
 	
+	return $msg;
 }
 
 function gaasSetADLogin_clientrecv($params)
 {
-	
+	return $params;
 }
+
+function gaasSetClientGroup_clientsend($params)
+{
+	$msg["clientgroup"] = $params[0];
+	return $msg;
+}
+
+function gaasSetClientGroup_clientrecv($params)
+{
+	return $params;
+}
+
+function gaasSetAdminGroup_clientsend($params)
+{
+	$msg["admingroup"] = $params[0];
+	return $msg;
+}
+
+function gaasSetAdminGroup_clientrecv($params)
+{
+	return $params;
+}
+
 ?>

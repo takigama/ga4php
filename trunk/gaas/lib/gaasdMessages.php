@@ -123,8 +123,6 @@ function gaasSetADLogin_server($msg)
 	$addom = $msg["domain"];
 	$adlogin = $msg["user"];
 	$adpass = $msg["pass"];
-	$adclientdef = $msg["clientdef"];
-	$adadmindef = $msg["admindef"];
 	
 	$res = adTestLogin($addmo, $adlogin, $adpass);
 	if($res != 0) {
@@ -134,10 +132,23 @@ function gaasSetADLogin_server($msg)
 	confSetVal("ad.domain", $addom);
 	confSetVal("ad.user", $adlogin);
 	confSetVal("ad.pass", $adpass);
-	confSetVal("ad.clientdef", $adclientdef);
-	confSetVal("ad.admindef", $adadmindef);
 	
 	return true;
 	
 }
+
+function gaasSetAdminGroup_server($msg)
+{
+	confSetVal("ad.admindef", $msg["admingroup"]);
+	
+	return true;
+}
+
+function gaasSetClientGroup_server($msg)
+{
+	confSetVal("ad.clientdef", $msg["clientgroup"]);
+	
+	return true;
+}
+
 ?>
