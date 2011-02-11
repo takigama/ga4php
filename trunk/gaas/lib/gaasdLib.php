@@ -49,11 +49,10 @@ function createDB()
 		return false;
 	}
 	
-	if($backEnd == "IN") {
-		$sql = 'CREATE TABLE "users" ("users_id" INTEGER PRIMARY KEY AUTOINCREMENT,"users_username" TEXT, "users_realname" TEXT, "users_password" TEXT, "users_tokendata" TEXT, "users_otk" TEXT);';
-		$dbobject->query($sql);
-	}
-	
+	// users_tokendata is used by ga4php, users_otk is the qrcode data link if needed, 
+	// tokentype is the software/hardware token types
+	$sql = 'CREATE TABLE "users" ("users_id" INTEGER PRIMARY KEY AUTOINCREMENT,"users_username" TEXT, "users_realname" TEXT, "users_password" TEXT, "users_tokendata" TEXT, "users_otk" TEXT, "user_enabled" TEXT, "users_tokentype" TEXT);';
+	$dbobject->query($sql);
 	$sql = 'CREATE TABLE "config" ("conf_id" INTEGER PRIMARY KEY AUTOINCREMENT,"conf_name" TEXT, "conf_value" TEXT);';
 	$dbobject->query($sql);
 	$sql = 'CREATE TABLE "radclients" ("rad_id" INTEGER PRIMARY KEY AUTOINCREMENT,"rad_name" TEXT, "rad_ip" TEXT, "rad_secret" TEXT, "rad_desc" TEXT);';
