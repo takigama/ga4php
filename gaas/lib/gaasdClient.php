@@ -86,8 +86,11 @@ class GAASClient {
 		$function_recv = $MESSAGES[$st_defined]."_clientrecv";
 		//echo "real function is $function_send, $function_recv\n";
 		
-		if(function_exists($function_send) && function_exists($function_recv)) {
-			return $function_recv($this->sendReceive($st_defined, $function_send($params)));
+		if(function_exists($function_send)) {
+			$fromsend = $this->sendReceive($st_defined, $function_send($params));
+			if(function_exists($function_recv)) {
+				return $function_recv($fromsend);
+			} else return $fromsend;
 		} else {
 			error_log("Function, $function does not exist!");
 		}

@@ -16,6 +16,7 @@ function usage()
 	echo "\tsetadlogin username password domain\n";
 	echo "\tsetclientgroup groupname - change the group membership requirements for client's with AD\n";
 	echo "\tsetadmingroup groupname - change the group membership requirements for admin's with AD\n";
+	echo "\tprovisionuser username [HOTP|TOTP] [KEY]- provision the user \"username\"\n";
 	echo "\n";
 	exit(0);
 }

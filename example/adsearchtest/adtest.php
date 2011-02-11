@@ -37,7 +37,6 @@ foreach($ars as $val) {
 $basecn = preg_replace("/,$/", "", $tcn);
 
 //$sr = ldap_search($cnt, "$basecn", "(&(objectclass=person)(memberof=*Administrators*))");
-//$sr = ldap_search($cnt, "$basecn", "(CN=CN=Administrators,CN=Builtin,DC=syd,DC=sententia,DC=com,DC=au)");
 $sr = ldap_search($cnt, "$basecn", "(&(objectclass=group)(CN=$adgroup))");
 $info = ldap_get_entries($cnt, $sr);
 
