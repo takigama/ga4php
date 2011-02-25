@@ -198,12 +198,23 @@ function gaasGetUsers_server($msg)
 		$addom = confGetVal("ad.domain");
 		$aduser = confGetVal("ad.user");
 		$adpass = confGetVal("ad.pass");
-		echo "using group $adgroup for $group\n";
+		//echo "using group $adgroup for $group\n";
 		
 		$users = getUsersInGroup($addom, $aduser, $adpass, $adgroup);
+		foreach($users as $user => $real) {
+			hasToken($user);
+		}
 	} else {
 		// internal db
-	}	
+	}
 	return $users;
+}
+
+function gaasDeleteUser_server($msg)
+{
+	$username = $msg["username"];
+	$db = getDB();
+	$db->query($sql = "delete from users where users_username='$username'");
+	
 }
 ?>

@@ -95,4 +95,11 @@ function gaasGetUsers_clientsend($params)
 	return $msg;
 }
 
+
+function gaasDeleteUser_clientsend($params)
+{
+	$msg["username"] = $params[0];
+	
+	return $msg;
+}
 ?>

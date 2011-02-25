@@ -96,6 +96,22 @@ function confDelVar($varname)
 	return true;
 }
 
+
+function hasToken($username)
+{
+	$db = getDB();
+	
+	$sql = "select * from users where users_username='$username'";
+	$res = $db->query($sql);
+	if(!$res) return false;
+	foreach($res as $row) {
+		print_r($row);
+	}
+	
+	return true;
+}
+
+
 // a funciton to deal with Config Vars
 function confGetVal($varname)
 {
