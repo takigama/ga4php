@@ -182,4 +182,28 @@ function gaasProvisionUser_server($msg)
 	return true;
 }
 
+function gaasGetUsers_server($msg)
+{
+	$haveTokens = $msg["havetokens"];
+	$userPatter = $msg["userpattern"];
+	$group = $msg["group"];
+	
+	if(confGetval("backend") == "AD") {
+		$adgroup = "";
+		if($group == "admin") {
+			$adgroup = confGetVal("ad.admindef");
+		} else {
+			$adgroup = confGetVal("ad.clientdef");
+		}
+		$addom = confGetVal("ad.domain");
+		$aduser = confGetVal("ad.user");
+		$adpass = confGetVal("ad.pass");
+		echo "using group $adgroup for $group\n";
+		
+		$users = getUsersInGroup($addom, $aduser, $adpass, $adgroup);
+	} else {
+		// internal db
+	}	
+	return $users;
+}
 ?>
