@@ -70,6 +70,15 @@ function gaasSetAdminGroup_clientsend($params)
 function gaasProvisionUser_clientsend($params)
 {
 	$msg["username"] = $params[0];
+	$msg["tokentype"] = "";
+	$msg["tokenkey"] = "";
+	if(isset($params[1])) {
+		$msg["tokentype"] = $params[1];
+	}
+	if(isset($params[2])) {
+		$msg["tokenkey"] = $params[2];
+	}
+	echo "sending msg\n";
 	return $msg;
 }
 

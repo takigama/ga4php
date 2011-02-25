@@ -51,9 +51,11 @@ function createDB()
 	
 	// users_tokendata is used by ga4php, users_otk is the qrcode data link if needed, 
 	// tokentype is the software/hardware token types
-	$sql = 'CREATE TABLE "users" ("users_id" INTEGER PRIMARY KEY AUTOINCREMENT,"users_username" TEXT, "users_realname" TEXT, \
-		"users_password" TEXT, "users_tokendata" TEXT, "users_qrcodeid" TEXT, "user_enabled" TEXT, "users_tokentype" TEXT);';
+	$sql = 'CREATE TABLE "users" ("users_id" INTEGER PRIMARY KEY AUTOINCREMENT,"users_username" TEXT, "users_realname" TEXT, "users_password" TEXT, "users_tokendata" TEXT, "users_qrcodeid" TEXT, "user_enabled" TEXT, "users_tokentype" TEXT);';
 	$dbobject->query($sql);
+	//if(!$res) {
+		//echo "Create user table failed\n";
+	//}
 	$sql = 'CREATE TABLE "config" ("conf_id" INTEGER PRIMARY KEY AUTOINCREMENT,"conf_name" TEXT, "conf_value" TEXT);';
 	$dbobject->query($sql);
 	$sql = 'CREATE TABLE "radclients" ("rad_id" INTEGER PRIMARY KEY AUTOINCREMENT,"rad_name" TEXT, "rad_ip" TEXT, "rad_secret" TEXT, "rad_desc" TEXT);';
@@ -189,15 +191,17 @@ class gaasdGA extends GoogleAuthenticator
 		
 		// we need to check if the user exists, and if so put the data, if not create the data
 		$sql = "select * from users where users_username='$username'";
+		echo "sql was: $sql\n";
 		$res = $dbObject->query($sql);
 		if($res->fetchColumn() > 0) {
 			// do update
 			//error_log("doing userdata update");
+			//"users_id" INTEGER PRIMARY KEY AUTOINCREMENT,"users_username" TEXT, "users_realname" TEXT, "users_password" TEXT, "users_tokendata" TEXT, "users_qrcodeid" TEXT, "user_enabled" TEXT, "users_tokentype" TEXT)
 			$sql = "update users set users_tokendata='$data' where users_username='$username'";
 		} else {
 			// do insert
 			//error_log("doing user data create");
-			$sql = "insert into users values (NULL, '$username', '', '', '$data', '')";
+			$sql = "insert into users values (NULL, '$username', '', '', '$data', '', '1', 'software')";
 		}
 		
 		if($dbObject->query($sql)) {

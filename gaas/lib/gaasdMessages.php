@@ -89,6 +89,7 @@ function gaasInitServer_server($msg)
 		confSetVal("ad.clientdef", $adclientdef);
 		confSetVal("ad.admindef", $adadmindef);
 		confSetVal("backend", "AD");
+		confSetVal("defaulttokentype", "TOTP");
 		
 		$initState = true;
 		$backEnd = "AD";
@@ -172,8 +173,31 @@ function gaasProvisionUser_server($msg)
 {
 	
 	// function userInGroup($user, $domain, $adlogin, $adpass, $group)
+	echo "in provision user\n";
+	print_r($msg);
+	$dttype = confGetVal("defaulttokentype");
+	if($dttype != "HOTP" && $dttype != "TOTP") {
+		echo "default token type not set, setting to TOTP\n";
+		confSetVal("defaulttokentype", "TOTP");
+		$dttype = "TOTP";
+	}
+	if($msg["tokentype"] == "") {
+		$ttype = confGetVal("defaulttokentype");
+	} else {
+		$ttype = $msg["tokentype"];
+	}
+	if($ttype != "HOTP" && $ttype != "TOTP") {
+		echo "using default token type, $dttype because user entered value of $ttype doesnt make sense\n";
+		$ttype = $dttype;
+	}
+	$tkey = $msg["tokenkey"];
 	if(confGetVal("backend") == "AD") {
-		userInGroup($msg["username"], confGetVal("ad.domain"), confGetVal("ad.user", $adlogin), confGetVal("ad.pass"), confGetVal("ad.clientdef"));
+		if(userInGroup($msg["username"], confGetVal("ad.domain"), confGetVal("ad.user"), confGetVal("ad.pass"), confGetVal("ad.clientdef"))) {
+			$myga = new gaasdGA();
+			$myga->setUser($msg["username"], $ttype, "", $tkey);
+		} else {
+			echo "User not in client group\n";
+		}
 	} else {
 		// internal db
 	}
