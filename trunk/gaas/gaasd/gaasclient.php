@@ -69,6 +69,11 @@ switch($argv[1]) {
 		break;
 	case "provision":
 		$username = $argv[2];
+		$ttype = "";
+		$tkey = "";
+		if(isset($argv[3])) $ttype = $argv[3];
+		if(isset($argv[4])) $tkey = $argv[4];
+		$ret = $myga->MSG_PROVISION_USER($username, $ttype, $tkey);
 		break;
 	case "getusers":
 		$group = "client";

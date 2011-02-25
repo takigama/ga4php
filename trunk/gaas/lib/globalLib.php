@@ -5,7 +5,7 @@ $BASE_DIR = realpath(dirname(__FILE__)."/../../");
 global $BASE_DIR;
 
 // the tcp port number we use for comms
-$TCP_PORT_NUMBER = 21336;
+$TCP_PORT_NUMBER = 21356;
 global $TCP_PORT_NUMBER;
 
 
@@ -142,13 +142,15 @@ function userInGroup($user, $domain, $adlogin, $adpass, $group)
 	
 	//exit(0);
 	
+	//echo "usercn: $usercn\n";
 	$basecn = preg_replace("/,$/", "", $tcn);
 	$sr = ldap_search($cnt, "$basecn", "(&(objectCategory=group)(member:1.2.840.113556.1.4.1941:=$usercn))");
 	$fil = "(&(objectCategory=group)(member:1.2.840.113556.1.4.1941:=$usercn))";
 	$info = ldap_get_entries($cnt, $sr);
 	foreach($info as $kpot => $lpot) {
 		if(isset($lpot["samaccountname"])) {
-			if($lpot["cn"][0] == $group) return true;
+			//echo "checking: ".$lpot["cn"][0]."\n";
+			if(strtolower($lpot["cn"][0]) == strtolower($group)) return true;
 		}
 	}
 	return false;
