@@ -73,4 +73,26 @@ function gaasProvisionUser_clientsend($params)
 	return $msg;
 }
 
+function gaasGetUsers_clientsend($params)
+{
+	$msg["havetokens"] = false;
+	$msg["userpattern"] = "";
+	$msg["group"] = "client";
+	if(isset($params[0])) {
+		if($params[0] == "admin") {
+			$msg["group"] = "admin";
+		}
+	}
+	if(isset($params[1])) {
+		$msg["userpattern"] = $params[1];
+	}
+	if(isset($params[2])) {
+		if($params[2] == "yes") {
+			$msg["havetokens"] = true;
+		}
+	}
+	
+	return $msg;
+}
+
 ?>

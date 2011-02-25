@@ -17,11 +17,12 @@ function usage()
 	echo "\tsetclientgroup groupname - change the group membership requirements for client's with AD\n";
 	echo "\tsetadmingroup groupname - change the group membership requirements for admin's with AD\n";
 	echo "\tprovisionuser username [HOTP|TOTP] [KEY]- provision the user \"username\"\n";
+	echo "\tgetusers [admin|client] [part-of-username] [yes] - get user list with admin or client group, part of a username and return only those with tokens (yes)\n";
 	echo "\n";
 	exit(0);
 }
 
-if($argc < 1) {
+if($argc < 2) {
 	usage();
 }
 
@@ -63,6 +64,19 @@ switch($argv[1]) {
 			echo "Resetting AD admin group details succeeded\n";
 		} else {
 			echo "Resetting AD admin group details failed\n";
+		}
+		break;
+	case "getusers":
+		$group = "client";
+		$partof = "";
+		$onlytokens = "no";
+		if(isset($argv[2])) $group = $argv[2];
+		if(isset($argv[3])) $partof = $argv[3];
+		if(isset($argv[4])) $onlytokens = $argv[4];
+		$ret = $myga->MSG_GET_USERS($group, $partof, $onlytokens);
+		//print_r($ret);
+		foreach($ret as $user) {
+			echo $user["realname"]." (".$user["username"].")\n";
 		}
 		break;
 	default:

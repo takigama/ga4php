@@ -18,16 +18,18 @@ define("MSG_SET_AD_LOGIN", 20);
 define("MSG_SET_CLIENT_GROUP", 21);
 define("MSG_SET_ADMIN_GROUP", 22);
 define("MSG_PROVISION_USER",23);
-
+define("MSG_GET_USERS", 24);
 
 // the gaasd call's $MESSAGE[<MSG>]_server() for the server side
 // and $MESSAGE[<msg>]_client() for the client side 
 $MESSAGES[MSG_STATUS] = "gaasStatus";
-$MESSAGES[MSG_INIT_SERVER] = "gaasInitServer";
-$MESSAGES[MSG_SET_AD_LOGIN] = "gaasSetADLogin";
-$MESSAGES[MSG_SET_CLIENT_GROUP] = "gaasSetClientGroup";
+$MESSAGES[MSG_INIT_SERVER] = "gaasInitServer"; 
+$MESSAGES[MSG_SET_AD_LOGIN] = "gaasSetADLogin"; // domain, user, password
+$MESSAGES[MSG_SET_CLIENT_GROUP] = "gaasSetClientGroup"; // groupname
 $MESSAGES[MSG_SET_ADMIN_GROUP] = "gaasSetAdminGroup";
-$MESSAGES[MSG_PROVISION_USER] = "gaasProvisionUser";
+$MESSAGES[MSG_PROVISION_USER] = "gaasProvisionUser"; // username
+$MESSAGES[MSG_GET_USERS] = "gaasGetUsers"; // [admin|client], [name pattern], [only with tokens]
+
 global $MESSAGES;
 
 
@@ -148,6 +150,61 @@ function userInGroup($user, $domain, $adlogin, $adpass, $group)
 		}
 	}
 	return false;
+}
+
+
+function getUsersInGroup($domain, $adlogin, $adpass, $group)
+{
+	$addom = $domain;
+	
+	$servers = dns_get_record("_gc._tcp.$addom");
+	if(count($servers)<1) {
+		echo "AD servers cant be found, fail!\n";
+	}
+	
+	
+	// we should check all servers, but lets just go with 0 for now
+	$cnt = ldap_connect($servers[0]["target"], $servers[0]["port"]);
+	$bind = ldap_bind($cnt, "$adlogin@$addom", "$adpass");
+	if($bind) {
+	} else {
+		echo "Bind Failed\n";
+		return false;
+	}
+	
+	$ars = explode(".", $addom);
+	
+	$tcn = "";
+	foreach($ars as $val) {
+		$tcn .= "DC=$val,";
+	}
+	
+	$basecn = preg_replace("/,$/", "", $tcn);
+	
+	// first, find the dn for our user
+	$sr = ldap_search($cnt, "$basecn", "(&(objectCategory=group)(cn=$group))");
+	$info = ldap_get_entries($cnt, $sr);
+	//print_r($info);
+	$groupcn=$info[0]["dn"];
+	//exit(0);
+	
+	$basecn = preg_replace("/,$/", "", $tcn);
+	$sr = ldap_search($cnt, "$basecn", "(&(objectCategory=user)(memberof:1.2.840.113556.1.4.1941:=$groupcn))");
+	//$fil = "(&(objectCategory=group)(member:1.2.840.113556.1.4.1941:=$usercn))";
+	$info = ldap_get_entries($cnt, $sr);
+	//print_r($info);
+	$arbi = "";
+	//exit(0);
+	$i = 0;
+	foreach($info as $kpot => $lpot) {
+		if(isset($lpot["samaccountname"])) {
+			$arbi[$i]["username"] = $lpot["samaccountname"][0];
+			$arbi[$i]["realname"] = $lpot["name"][0];
+			$i++;
+		}
+	}
+	
+	return $arbi;
 }
 
 function generateRandomString($len)
