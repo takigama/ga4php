@@ -19,6 +19,7 @@ define("MSG_SET_CLIENT_GROUP", 21);
 define("MSG_SET_ADMIN_GROUP", 22);
 define("MSG_PROVISION_USER",23);
 define("MSG_GET_USERS", 24);
+define("MSG_DELETE_USER", 25);
 
 // the gaasd call's $MESSAGE[<MSG>]_server() for the server side
 // and $MESSAGE[<msg>]_client() for the client side 
@@ -29,6 +30,7 @@ $MESSAGES[MSG_SET_CLIENT_GROUP] = "gaasSetClientGroup"; // groupname
 $MESSAGES[MSG_SET_ADMIN_GROUP] = "gaasSetAdminGroup";
 $MESSAGES[MSG_PROVISION_USER] = "gaasProvisionUser"; // username
 $MESSAGES[MSG_GET_USERS] = "gaasGetUsers"; // [admin|client], [name pattern], [only with tokens]
+$MESSAGES[MSG_DELETE_USER] = "gaasDeleteUser"; // username
 
 global $MESSAGES;
 
@@ -198,9 +200,7 @@ function getUsersInGroup($domain, $adlogin, $adpass, $group)
 	$i = 0;
 	foreach($info as $kpot => $lpot) {
 		if(isset($lpot["samaccountname"])) {
-			$arbi[$i]["username"] = $lpot["samaccountname"][0];
-			$arbi[$i]["realname"] = $lpot["name"][0];
-			$i++;
+			$arbi[$lpot["samaccountname"][0]] =  $lpot["name"][0];
 		}
 	}
 	
