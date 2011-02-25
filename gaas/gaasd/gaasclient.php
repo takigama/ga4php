@@ -16,7 +16,10 @@ function usage()
 	echo "\tsetadlogin username password domain\n";
 	echo "\tsetclientgroup groupname - change the group membership requirements for client's with AD\n";
 	echo "\tsetadmingroup groupname - change the group membership requirements for admin's with AD\n";
-	echo "\tprovision username [HOTP|TOTP] [KEY]- provision the user \"username\"\n";
+	echo "\tprovisiontoken username [HOTP|TOTP] [KEY]- provision the user \"username\"\n";
+	echo "\tassign username tokenid - assign a hardware token to a user\n";
+	echo "\taddtoken token_name token_key token_type - adds a hardware token to the DB\n";
+	echo "\tgethwtokens - gets a list of hardware tokens by token_name\n";
 	echo "\tgetusers [admin|client] [part-of-username] [yes] - get user list with admin or client group, part of a username and return only those with tokens (yes)\n";
 	echo "\tdeleteuser username - deletes the key for the specified user\n";
 	echo "\n";
@@ -67,7 +70,24 @@ switch($argv[1]) {
 			echo "Resetting AD admin group details failed\n";
 		}
 		break;
-	case "provision":
+	case "assign":
+		$username = $argv[2];
+		$tokenid = $argv[3];
+		$ret = $myga->MSG_ASSIGN_TOKEN($username, $tokenid);
+		break;
+	case "gethwtokens":
+		$ret = $myga->MSG_GET_HARDWARE();
+		foreach($ret as $tok) {
+			echo "Token, ".$tok["name"]." is of type ".$tok["type"]."\n";
+		}
+		break;
+	case "addtoken":
+		$tokenid = $argv[2];
+		$tokenkey = $argv[3];
+		$tokentype = $argv[4];
+		$ret = $myga->MSG_ADD_HARDWARE($tokenid, $tokenkey, $tokentype);
+		break;
+	case "provisiontoken":
 		$username = $argv[2];
 		$ttype = "";
 		$tkey = "";

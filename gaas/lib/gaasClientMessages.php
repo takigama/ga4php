@@ -82,6 +82,31 @@ function gaasProvisionUser_clientsend($params)
 	return $msg;
 }
 
+function gaasGetHardwareTokens_clientsend($params)
+{
+	return $params;
+}
+
+// TODO ERROR CHECK
+function gaasAddHardwareToken_clientsend($params)
+{
+	$msg["tokenid"] = $params[0];
+	$msg["tokenkey"] = $params[1];
+	$msg["tokentype"] = $params[2];
+		
+	print_r($msg);
+	return $msg;
+}
+
+// TODO ERROR CHECK
+function gaasAssignToken_clientsend($params)
+{
+	$msg["username"] = $params[0];
+	$msg["tokenid"] = $params[1];
+	
+	return $msg;
+}
+
 function gaasGetUsers_clientsend($params)
 {
 	$msg["havetokens"] = false;
