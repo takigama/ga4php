@@ -113,6 +113,12 @@ function hasToken($username)
 	return true;
 }
 
+function createUserInDB($username, $realname)
+{
+	$db = getDB();
+	
+	$sql = "insert into users values (NULL, '$username', '$realname', '', '$data', '', '1', '')";		
+}
 
 // a funciton to deal with Config Vars
 function confGetVal($varname)

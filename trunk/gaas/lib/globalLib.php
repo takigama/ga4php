@@ -5,7 +5,7 @@ $BASE_DIR = realpath(dirname(__FILE__)."/../../");
 global $BASE_DIR;
 
 // the tcp port number we use for comms
-$TCP_PORT_NUMBER = 21356;
+$TCP_PORT_NUMBER = 21256;
 global $TCP_PORT_NUMBER;
 
 
@@ -20,6 +20,9 @@ define("MSG_SET_ADMIN_GROUP", 22);
 define("MSG_PROVISION_USER",23);
 define("MSG_GET_USERS", 24);
 define("MSG_DELETE_USER", 25);
+define("MSG_ASSIGN_TOKEN",26);
+define("MSG_ADD_HARDWARE",27);
+define("MSG_GET_HARDWARE",28);
 
 // the gaasd call's $MESSAGE[<MSG>]_server() for the server side
 // and $MESSAGE[<msg>]_client() for the client side 
@@ -28,9 +31,12 @@ $MESSAGES[MSG_INIT_SERVER] = "gaasInitServer";
 $MESSAGES[MSG_SET_AD_LOGIN] = "gaasSetADLogin"; // domain, user, password
 $MESSAGES[MSG_SET_CLIENT_GROUP] = "gaasSetClientGroup"; // groupname
 $MESSAGES[MSG_SET_ADMIN_GROUP] = "gaasSetAdminGroup";
-$MESSAGES[MSG_PROVISION_USER] = "gaasProvisionUser"; // username
+$MESSAGES[MSG_PROVISION_USER] = "gaasProvisionUser"; // username, tokentype, tokenkey, hardware|software
 $MESSAGES[MSG_GET_USERS] = "gaasGetUsers"; // [admin|client], [name pattern], [only with tokens]
 $MESSAGES[MSG_DELETE_USER] = "gaasDeleteUser"; // username
+$MESSAGES[MSG_ASSIGN_TOKEN] = "gaasAssignToken"; // username, tokenid
+$MESSAGES[MSG_ADD_HARDWARE] = "gaasAddHardwareToken"; // username, tokenid
+$MESSAGES[MSG_GET_HARDWARE] = "gaasGetHardwareTokens"; //
 
 global $MESSAGES;
 

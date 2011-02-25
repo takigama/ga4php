@@ -194,7 +194,14 @@ function gaasProvisionUser_server($msg)
 	if(confGetVal("backend") == "AD") {
 		if(userInGroup($msg["username"], confGetVal("ad.domain"), confGetVal("ad.user"), confGetVal("ad.pass"), confGetVal("ad.clientdef"))) {
 			$myga = new gaasdGA();
-			$myga->setUser($msg["username"], $ttype, "", $tkey);
+			
+			// TODO - figure out how to deal with the token origin - i.e. software/hardware
+			if($msg["origin"] == "hardware") {
+				echo "want a hardware token, but i dont know how to do this yet\n";
+			} else {
+				echo "using software token\n";
+				$myga->setUser($msg["username"], $ttype, "", $tkey);
+			}
 		} else {
 			echo "User not in client group\n";
 		}
@@ -204,6 +211,54 @@ function gaasProvisionUser_server($msg)
 	
 	
 	return true;
+}
+
+// TODO error check/ value check
+function gaasAddHardwareToken_server($msg)
+{
+	$tokenid = $msg["tokenid"];
+	$tokenkey = $msg["tokenkey"];
+	$tokentype = $msg["tokentype"];
+	
+	//"hardwaretokens" ("tok_id" INTEGER PRIMARY KEY AUTOINCREMENT,"tok_name" TEXT, "tok_key" TEXT, "tok_type" TEXT);';
+	print_r($msg);
+	$db = getDB();
+	$sql = "insert into hardwaretokens values (NULL, '$tokenid', '$tokenkey', '$tokentype')";
+	echo "Sql is $sql\n";
+	$ret = $db->query($sql);
+	if($ret) return true;
+	else return false;
+	
+}
+
+
+function gaasGetHardwareTokens_server($msg)
+{
+	$db = getDB();
+	
+	$sql = "select tok_name, tok_type from hardwaretokens";
+	$ret = $db->query($sql);
+	
+	$toks = "";
+	$i = 0;
+	foreach($ret as $row) {
+		$toks[$i]["name"] = $row["tok_name"];
+		$toks[$i]["type"] = $row["tok_type"];
+		$i++;
+	}
+	
+	return $toks;
+}
+
+
+function gaasAssignToken_server($msg)
+{
+	if(!isset($msg["tokenid"])) return false;
+	
+	// now, we check the username is in the client gorup
+	// now we check the token id is valid in the hardware db.
+	
+	// then we assign to the user
 }
 
 function gaasGetUsers_server($msg)
