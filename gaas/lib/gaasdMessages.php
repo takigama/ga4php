@@ -334,7 +334,9 @@ function gaasDeleteUser_server($msg)
 {
 	$username = $msg["username"];
 	$db = getDB();
-	$db->query($sql = "delete from users where users_username='$username'");
+	if($db->query("delete from users where users_username='$username'")) {
+		return true;
+	} else return false;
 	
 }
 ?>

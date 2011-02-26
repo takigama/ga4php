@@ -26,11 +26,11 @@ define("MSG_GET_HARDWARE",28);
 
 // the gaasd call's $MESSAGE[<MSG>]_server() for the server side
 // and $MESSAGE[<msg>]_client() for the client side 
-$MESSAGES[MSG_STATUS] = "gaasStatus";
-$MESSAGES[MSG_INIT_SERVER] = "gaasInitServer"; 
+$MESSAGES[MSG_STATUS] = "gaasStatus"; //
+$MESSAGES[MSG_INIT_SERVER] = "gaasInitServer"; // AD: "AD", "user", "pass", "domain", "client def", "admin def" - IN: "IN", "user", "pass"
 $MESSAGES[MSG_SET_AD_LOGIN] = "gaasSetADLogin"; // domain, user, password
 $MESSAGES[MSG_SET_CLIENT_GROUP] = "gaasSetClientGroup"; // groupname
-$MESSAGES[MSG_SET_ADMIN_GROUP] = "gaasSetAdminGroup";
+$MESSAGES[MSG_SET_ADMIN_GROUP] = "gaasSetAdminGroup"; // groupname
 $MESSAGES[MSG_PROVISION_USER] = "gaasProvisionUser"; // username, tokentype, tokenkey, hardware|software
 $MESSAGES[MSG_GET_USERS] = "gaasGetUsers"; // [admin|client], [name pattern], [only with tokens]
 $MESSAGES[MSG_DELETE_USER] = "gaasDeleteUser"; // username
