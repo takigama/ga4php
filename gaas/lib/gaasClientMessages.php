@@ -49,7 +49,7 @@ function gaasInitServer_clientrecv($params)
 function gaasSetADLogin_clientsend($params)
 {
 	$msg["domain"] = $params[2];
-	$msg["user"] = $params[0];
+	$msg["user"] = strtolower($params[0]);
 	$msg["pass"] = $params[1];
 	
 	return $msg;
@@ -69,7 +69,7 @@ function gaasSetAdminGroup_clientsend($params)
 
 function gaasProvisionUser_clientsend($params)
 {
-	$msg["username"] = $params[0];
+	$msg["username"] = strtolower($params[0]);
 	$msg["tokentype"] = "";
 	$msg["tokenkey"] = "";
 	if(isset($params[1])) {
@@ -101,7 +101,7 @@ function gaasAddHardwareToken_clientsend($params)
 // TODO ERROR CHECK
 function gaasAssignToken_clientsend($params)
 {
-	$msg["username"] = $params[0];
+	$msg["username"] = strtolower($params[0]);
 	$msg["tokenid"] = $params[1];
 	
 	return $msg;
@@ -111,10 +111,13 @@ function gaasGetUsers_clientsend($params)
 {
 	$msg["havetokens"] = false;
 	$msg["userpattern"] = "";
-	$msg["group"] = "client";
+	$msg["group"] = "all";
 	if(isset($params[0])) {
 		if($params[0] == "admin") {
 			$msg["group"] = "admin";
+		}
+		if($params[0] == "client") {
+			$msg["group"] = "client";
 		}
 	}
 	if(isset($params[1])) {
@@ -132,7 +135,7 @@ function gaasGetUsers_clientsend($params)
 
 function gaasDeleteUser_clientsend($params)
 {
-	$msg["username"] = $params[0];
+	$msg["username"] = strtolower($params[0]);
 	
 	return $msg;
 }

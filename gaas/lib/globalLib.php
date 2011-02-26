@@ -29,8 +29,8 @@ global $TCP_PORT_NUMBER;
  * get qrcode
  * re-create user token
  * set user pin
- * authenticate token
- * authenticate pin
+ * authenticate user by token
+ * authenticate user by password
  * 
  */
 
@@ -232,7 +232,9 @@ function getUsersInGroup($domain, $adlogin, $adpass, $group)
 	$i = 0;
 	foreach($info as $kpot => $lpot) {
 		if(isset($lpot["samaccountname"])) {
-			$arbi[$lpot["samaccountname"][0]] =  $lpot["name"][0];
+			$arbi[$i]["realname"] =  $lpot["name"][0];
+			$arbi[$i]["username"] = strtolower($lpot["samaccountname"][0]);
+			$i++;
 		}
 	}
 	
