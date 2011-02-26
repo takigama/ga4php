@@ -9,6 +9,30 @@ $TCP_PORT_NUMBER = 21256;
 global $TCP_PORT_NUMBER;
 
 
+/* tasks we need to do (- prefix means done or working)
+ * - status
+ * - init
+ * - set ad login
+ * - set ad client group
+ * - set ad admin group
+ * - provision user
+ * - get users
+ * - delete user
+ * - create hardware token
+ * - list hardware tokens
+ * - assign hardware token
+ * disable user
+ * set user password
+ * enable admin for user
+ * disable admin for user
+ * resync token
+ * get qrcode
+ * re-create user token
+ * set user pin
+ * authenticate token
+ * authenticate pin
+ * 
+ */
 
 
 // the messages structure, used to extend gaas if needed
