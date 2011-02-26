@@ -51,7 +51,7 @@ function createDB()
 	
 	// users_tokendata is used by ga4php, users_otk is the qrcode data link if needed, 
 	// tokentype is the software/hardware token types
-	$sql = 'CREATE TABLE "users" ("users_id" INTEGER PRIMARY KEY AUTOINCREMENT,"users_username" TEXT, "users_realname" TEXT, "users_password" TEXT, "users_tokendata" TEXT, "users_qrcodeid" TEXT, "user_enabled" TEXT, "users_tokentype" TEXT);';
+	$sql = 'CREATE TABLE "users" ("users_id" INTEGER PRIMARY KEY AUTOINCREMENT,"users_username" TEXT, "users_realname" TEXT, "users_password" TEXT, "users_tokendata" TEXT, "users_qrcodeid" TEXT, "user_enabled" TEXT, "users_tokentype" TEXT, "users_isadmin" TEXT, "users_pin" TEXT);';
 	$dbobject->query($sql);
 	//if(!$res) {
 		//echo "Create user table failed\n";
@@ -117,7 +117,7 @@ function createUserInDB($username, $realname)
 {
 	$db = getDB();
 	
-	$sql = "insert into users values (NULL, '$username', '$realname', '', '$data', '', '1', '')";		
+	$sql = "insert into users values (NULL, '$username', '$realname', '', '$data', '', '1', '', '0', '')";		
 }
 
 // a funciton to deal with Config Vars
@@ -207,7 +207,7 @@ class gaasdGA extends GoogleAuthenticator
 		} else {
 			// do insert
 			//error_log("doing user data create");
-			$sql = "insert into users values (NULL, '$username', '', '', '$data', '', '1', 'software')";
+			$sql = "insert into users values (NULL, '$username', '', '', '$data', '', '1', 'software', '0', '')";
 		}
 		
 		if($dbObject->query($sql)) {
