@@ -218,8 +218,12 @@ function gaasAddHardwareToken_server($msg)
 {
 	$tokenid = $msg["tokenid"];
 	$tokenkey = $msg["tokenkey"];
-	$tokentype = $msg["tokentype"];
+	$tokentype = strtoupper($msg["tokentype"]);
 	
+	if($tokentype != "HOTP" && $tokentype != "TOTP") {
+		echo "invalid token type from hardware entry\n";
+		return false;
+	}
 	//"hardwaretokens" ("tok_id" INTEGER PRIMARY KEY AUTOINCREMENT,"tok_name" TEXT, "tok_key" TEXT, "tok_type" TEXT);';
 	print_r($msg);
 	$db = getDB();
@@ -255,8 +259,45 @@ function gaasAssignToken_server($msg)
 {
 	if(!isset($msg["tokenid"])) return false;
 	
+	$tokenid = $msg["tokenid"];
+	
 	// now, we check the username is in the client gorup
-	// now we check the token id is valid in the hardware db.
+	if(confGetVal("backend") == "AD") {
+		if(userInGroup($msg["username"], confGetVal("ad.domain"), confGetVal("ad.user"), confGetVal("ad.pass"), confGetVal("ad.clientdef"))) {
+			$myga = new gaasdGA();
+			
+			$sql = "select * from hardwaretokens"; // where tok_name='$tokenid'";
+			echo "yes, i am here $sql\n";
+			$db = getDB();
+			$ret = $db->query($sql);
+			$tok_key = "";
+			$tok_type = "";
+			if(!$ret) {
+				echo "got a token assignment for an invalid name\n";
+				print_r($msg);
+				return false;
+			} else {
+				// we have something
+				echo "i am here?\n";
+				foreach($ret as $row) {
+					echo "got a row\n";
+					print_r($row);
+					$tok_key = $row["tok_key"];
+					$tok_type = $row["tok_type"];
+				}
+			}
+			
+			if($tok_type == "" || $tok_key == "") {
+				echo "error in token data from hardware token in DB\n";
+			}
+			
+			echo "and here too, $tok_type, $tok_key\n";
+			if(!$myga->setUser($msg["username"], $tok_type, "", $tok_key)) {
+				print_r($msg);
+				echo "errror assigning token?\n";
+			}
+		} else return false;
+	}
 	
 	// then we assign to the user
 }
