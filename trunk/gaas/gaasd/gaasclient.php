@@ -16,7 +16,7 @@ function usage()
 	echo "\tsetadlogin username password domain\n";
 	echo "\tsetclientgroup groupname - change the group membership requirements for client's with AD\n";
 	echo "\tsetadmingroup groupname - change the group membership requirements for admin's with AD\n";
-	echo "\tprovisiontoken username [HOTP|TOTP] [KEY]- provision the user \"username\"\n";
+	echo "\tprovisiontoken username [HOTP|TOTP] [KEY] - provision the user \"username\"\n";
 	echo "\tassign username tokenid - assign a hardware token to a user\n";
 	echo "\taddtoken token_name token_key token_type - adds a hardware token to the DB\n";
 	echo "\tgethwtokens - gets a list of hardware tokens by token_name\n";
@@ -103,8 +103,14 @@ switch($argv[1]) {
 		if(isset($argv[3])) $partof = $argv[3];
 		if(isset($argv[4])) $onlytokens = $argv[4];
 		$ret = $myga->MSG_GET_USERS($group, $partof, $onlytokens);
-		foreach($ret as $user => $real) {
-			echo "$real ($user)\n";
+		foreach($ret as $key => $val) {
+			$real = $val["realname"];
+			$user = $val["username"];
+			$hastok = "";
+			if($val["hastoken"]) {
+				$hastok = " * ";
+			}
+			echo "$hastok$real ($user)\n";
 		}
 		break;
 	case "deleteuser":

@@ -195,13 +195,8 @@ function gaasProvisionUser_server($msg)
 		if(userInGroup($msg["username"], confGetVal("ad.domain"), confGetVal("ad.user"), confGetVal("ad.pass"), confGetVal("ad.clientdef"))) {
 			$myga = new gaasdGA();
 			
-			// TODO - figure out how to deal with the token origin - i.e. software/hardware
-			if($msg["origin"] == "hardware") {
-				echo "want a hardware token, but i dont know how to do this yet\n";
-			} else {
-				echo "using software token\n";
-				$myga->setUser($msg["username"], $ttype, "", $tkey);
-			}
+			echo "using software token\n";
+			$myga->setUser($msg["username"], $ttype, "", $tkey);
 		} else {
 			echo "User not in client group\n";
 		}
@@ -307,6 +302,7 @@ function gaasGetUsers_server($msg)
 	$haveTokens = $msg["havetokens"];
 	$userPatter = $msg["userpattern"];
 	$group = $msg["group"];
+	$myga = new gaasdGA();
 	
 	if(confGetval("backend") == "AD") {
 		$adgroup = "";
@@ -314,19 +310,28 @@ function gaasGetUsers_server($msg)
 			$adgroup = confGetVal("ad.admindef");
 		} else {
 			$adgroup = confGetVal("ad.clientdef");
-		}
+		} 
 		$addom = confGetVal("ad.domain");
 		$aduser = confGetVal("ad.user");
 		$adpass = confGetVal("ad.pass");
 		//echo "using group $adgroup for $group\n";
 		
 		$users = getUsersInGroup($addom, $aduser, $adpass, $adgroup);
-		foreach($users as $user => $real) {
-			hasToken($user);
+		foreach($users as $key => $val) {
+			$user = $val["username"];
+			//echo "checking $user for token - ";
+			if($myga->hasToken($user)) {
+				$users[$key]["hastoken"] = true;
+				//echo "yes\n";
+			} else {
+				$users[$key]["hastoken"] = false;
+				//echo "no\n";
+			}
 		}
 	} else {
 		// internal db
 	}
+	//print_r($users);
 	return $users;
 }
 
