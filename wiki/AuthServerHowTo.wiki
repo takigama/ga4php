@@ -1,3 +1,5 @@
+Please note, this page is now no longer valid due to me being in the process of a re-write.
+
 = Introduction =
 
 The radius authenticator exists in the subdirectory "authserver". It'll have a couple of goals:
