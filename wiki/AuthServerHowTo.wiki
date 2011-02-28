@@ -1,4 +1,4 @@
-Please note, this page is now no longer valid due to me being in the process of a re-write.
+Please note, this page is now no longer valid due to me being in the process of a re-write. See the AuthServerV2 page for more up-to-date info.
 
 = Introduction =
 
